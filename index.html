@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Merge & Roll - PC Idle Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Pretendard', 'Segoe UI', sans-serif; }
+        
+        body { 
+            margin: 0; padding: 0; 
+            background: #2b2b2b; /* PC 환경용 어두운 배경 */
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; width: 100vw; overflow: hidden;
+            color: #4a4e69; 
+            user-select: none;
+        }
+
+        /* 💡 PC 고정형 레이아웃 (420 x 800) */
+        #app {
+            width: 420px; height: 800px; 
+            background: rgba(253, 251, 247, 1); position: relative;
+            display: flex; flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5); overflow: hidden;
+            border-radius: 12px; border: 4px solid #d2bce3;
+        }
+
+        @keyframes mergeShake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+        .merge-shake { animation: mergeShake 0.15s ease-in-out; }
+
+        @keyframes whiteFlash {
+            0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; filter: brightness(2); background: rgba(255,255,255,1); }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; background: rgba(255,255,255,0); }
+        }
+        @keyframes ringExpand {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; border: 4px solid rgba(255,255,255,0.9); }
+            100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; border: 1px solid rgba(255,255,255,0); }
+        }
+
+        /* ================= [ 상단 바 ] ================= */
+        #top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background: #fff; border-bottom: 2px solid #e8dff5; flex-shrink: 0; z-index: 20;
+        }
+        .top-stats { display: flex; gap: 8px; align-items: center; width: 100%; justify-content: flex-end;}
+        .stat-badge { 
+            background: #fdfbf7; padding: 6px 10px; border-radius: 10px; 
+            font-size: 14px; font-weight: bold; border: 1px solid #e8dff5; display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .stat-badge.gold { color: #d35400; }
+        .stat-badge.merge { color: #6a4c9c; }
+
+        /* ================= [ SPA 뷰 컨테이너 구조 ] ================= */
+        #main-content {
+            flex: 1; position: relative; width: 100%; height: 100%; overflow: hidden; background: #fdfbf7;
+        }
+        .view-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; overflow: hidden; 
+        }
+        .view-container.active { display: flex; }
+
+        /* ================= [ 뷰: 로비 ] ================= */
+        #view-lobby {
+            background: url('images/bg/lobby/01_seashore.jpg') center center / cover no-repeat;
+            background-color: #ffdcb5; /* Fallback */
+            align-items: center; justify-content: center; position: relative;
+        }
+        .lobby-char-container {
+            position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .lobby-char {
+            height: 75%; max-height: 600px; object-fit: contain; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.3));
+            animation: floatChar 3s ease-in-out infinite; transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        @keyframes floatChar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .lobby-nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); font-size: 24px; color: #4a4e69;
+            background: rgba(255,255,255,0.7); border: 2px solid #b9a0e6; border-radius: 50%; 
+            width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; 
+            cursor: pointer; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.2s;
+        }
+        .lobby-nav-btn:active { transform: translateY(-50%) scale(0.9); }
+        .lobby-prev { left: 15px; }
+        .lobby-next { right: 15px; }
+
+        /* ================= [ 뷰: 전투 ] ================= */
+        #board-section {
+            flex-shrink: 0; height: 160px; background: #e8dff5; position: relative; border-bottom: 4px solid #b9a0e6;
+            display: flex; justify-content: center; align-items: center; padding: 5px 10px; z-index: 10;
+        }
+        
+        #battle-stage {
+            width: 100%; height: 145px; background-color: #2c2c2c;
+            background: url('images/bg/bt/bt_bg01.png') center center / 100% 100% no-repeat;
+            border: 3px solid #b9a0e6; border-radius: 12px; position: relative; overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+        
+        .character.enemy { position: absolute; font-size: 65px; top: 45px; line-height: 1; transition: all 0.2s ease-out; right: -80px; opacity: 0; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+        .character.enemy.slide-in { right: 15%; opacity: 1; }
+        .character.enemy.explode { right: 15%; animation: explodeAnim 0.4s forwards ease-out; }
+
+        .hero { 
+            position: absolute; left: 15%; top: 30px; 
+            height: 90px; width: auto; object-fit: contain;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); 
+            transition: all 0.15s ease-out; z-index: 5;
+        }
+        .hero.attack { transform: translateX(50px) rotate(15deg) scale(1.2); }
+        .hero.happy { transform: translateY(-15px) scale(1.1); filter: drop-shadow(0 0 15px #f6e58d); }
+
+        @keyframes explodeAnim { 
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); } 
+            50% { transform: scale(1.4) rotate(-15deg); opacity: 0.8; filter: brightness(1.5) drop-shadow(0 0 15px #ff4757); } 
+            100% { transform: scale(2) rotate(15deg); opacity: 0; filter: blur(4px); } 
+        }
+
+        #game-section {
+            flex: 1; background: url('images/bg/merge/merge_bg01.png') center bottom / 100% 100% no-repeat;
+            position: relative; overflow: hidden; touch-action: none; background-color: #fdfbf7;
+        }
+        #game-section::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('images/bg/merge/merge_guide01.png') center bottom / 100% 100% no-repeat;
+            pointer-events: none; z-index: 10; 
+        }
+        
+        #physics-area {
+            position: absolute; top: 9%; bottom: 3%; left: 4%; right: 4%; 
+            z-index: 1; cursor: crosshair; overflow: hidden; border-radius: 8px;
+        }
+        #physics-area canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
+        #preview-ball { position: absolute; top: 20px; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 20; opacity: 0.9; display: none; }
+        #drop-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(185, 160, 230, 0.3); border-left: 2px dashed #b9a0e6; pointer-events: none; display: none; z-index: 5; transform: translateX(-50%); }
+        #deadline-line { position: absolute; top: 45px; left: 0; right: 0; height: 2px; background: rgba(255, 112, 166, 0.2); border-bottom: 2px dashed #ff70a6; z-index: 4; pointer-events: none; }
+        
+        #fever-banner, #warning-banner {
+            position: absolute; top: 55px; left: 50%; transform: translateX(-50%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 2px solid white; display: none; z-index: 15; animation: pulse 0.5s infinite alternate;
+        }
+        #fever-banner { top: 5px; background: #f6e58d; color: #574b90; box-shadow: 0 4px 10px rgba(246, 229, 141, 0.6); }
+        #warning-banner { background: #ff477e; box-shadow: 0 4px 10px rgba(255, 71, 126, 0.4); }
+        
+        @keyframes pulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.05); } }
+
+        #wipeout-anim { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 150px; z-index: 100; filter: drop-shadow(0 0 20px rgba(255, 71, 87, 0.8)); pointer-events: none; }
+
+        #ui-section { flex-shrink: 0; background: #f9f0ff; padding: 10px 15px; display: flex; flex-direction: column; border-top: 4px solid #d2bce3; z-index: 10; }
+        .item-group { display: flex; justify-content: space-between; align-items: stretch; gap: 8px; }
+        .btn-item { flex: 1; padding: 8px 0; border: 2px solid #fff; border-radius: 10px; font-size: 12px; font-weight: 900; color: #4a4e69; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: all 0.1s; }
+        .btn-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent !important; }
+        .btn-item span.icon-main { font-size: 18px; margin-bottom: 2px; display: block; }
+        .cost-label { font-size: 11px; color: #d81b60; margin-top: 4px; font-weight: 900;}
+        
+        .btn-mult { background: #d1c4e9; box-shadow: 0 4px 0 #9575cd; justify-content: center; }
+        .btn-hammer { background: #82ccdd; box-shadow: 0 4px 0 #60a3bc; } 
+        .btn-shake { background: #f6e58d; box-shadow: 0 4px 0 #f4d03f; } 
+        .btn-tornado { background: #b8e994; box-shadow: 0 4px 0 #78e08f; } 
+        .btn-auto { flex: 1.2; background: #fff; box-shadow: 0 4px 0 #b2bec3; border: 2px solid #d2bce3; transform: scale(1.05); margin: 0 4px;}
+        .btn-auto.active { background: #4fc3f7; color: white; box-shadow: 0 0 0 transparent; border-color:#fff; transform: scale(1.05) translateY(4px); }
+
+        /* ================= [ 제네릭 뷰 스타일 (공통) ] ================= */
+        .view-title { background: #cda8e6; color: white; text-align: center; padding: 15px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 10px rgba(185, 160, 230, 0.4); flex-shrink: 0; z-index:10; }
+        .view-content { padding: 20px; flex: 1; overflow-y: auto; overflow-x: hidden;}
+
+        /* 상점/캐릭터/마이룸 패널 UI */
+        .panel { background: #fff; border: 2px solid #e8dff5; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .panel-title { font-size: 16px; font-weight: 900; color: #6a4c9c; border-bottom: 2px dashed #e8dff5; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        
+        .action-btn-main { width: 100%; background: #b9f6ca; border: 2px solid #69f0ae; border-radius: 12px; padding: 15px; font-size: 16px; font-weight: 900; color: #1b5e20; cursor: pointer; box-shadow: 0 4px 0 #69f0ae; transition: all 0.1s; margin-bottom: 15px;}
+        .action-btn-main:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .action-btn-main:disabled { background: #eee; border-color: #ccc; color: #999; box-shadow: 0 4px 0 #ccc; cursor: not-allowed; }
+
+        .inventory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .inv-item { background: #fdfbf7; border: 2px solid #e8dff5; border-radius: 12px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; position: relative;}
+        .inv-item.unowned { filter: grayscale(1); opacity: 0.4; }
+        .inv-item .emoji { font-size: 30px; margin-bottom: 5px; }
+        .inv-item .count { position: absolute; top: -5px; right: -5px; background: #ff477e; color: #fff; font-size: 11px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #fff;}
+        .tier-label { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 8px; color: #fff; }
+        .tier-SS { background: #d35400; } .tier-S { background: #e67e22; } .tier-A { background: #9b59b6; } .tier-B { background: #3498db; } .tier-C { background: #95a5a6; }
+
+        /* ================= [ 간식서리 미니게임 ] ================= */
+        #minigame-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 4000; display: none; flex-direction: column; justify-content: center; align-items: center; color: #fff; padding: 20px; backdrop-filter: blur(5px); }
+        .reward-container { display: flex; gap: 8px; margin-top: 15px; width: 100%; justify-content: center; }
+        .reward-item { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 5px 8px; display: flex; flex-direction: column; align-items: center; font-size: 11px; filter: grayscale(1); opacity: 0.6; transition: all 0.3s ease; flex: 1; text-align: center; }
+        .reward-item .emoji { font-size: 20px; margin-bottom: 2px; }
+        .reward-item .gold { color: #f6e58d; font-weight: bold; }
+        .reward-item .count { font-size: 10px; color: #fff; margin-top: 2px; }
+        .memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 280px; margin-top: 20px; }
+        .memory-card { aspect-ratio: 1; background: #b9a0e6; border-radius: 12px; font-size: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 0 #8e7cc3; transition: transform 0.1s, background 0.2s; user-select: none; }
+        .memory-card.flipped { background: #fff; box-shadow: 0 4px 0 #ddd; cursor: default;}
+        #auto-heist-msg { margin-top: 15px; color: #ff7675; font-weight: bold; font-size: 14px; min-height: 20px;}
+
+        /* 이벤트 결과 팝업 */
+        #event-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:4500; display:none; }
+        #event-result { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); flex-direction:column; align-items:center; justify-content:center; width:100%; z-index:5000; text-align:center; color:white; display:none; }
+        @keyframes popZoom { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        .pop-zoom { animation: popZoom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* ================= [ 하단 네비게이션 ] ================= */
+        #bottom-nav {
+            flex-shrink: 0; height: 70px; background: #fff; border-top: 2px solid #e8dff5;
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            flex: 1; height: 100%; color: #b2bec3; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+        }
+        .nav-item .icon { font-size: 24px; margin-bottom: 4px; transition: transform 0.2s; filter: grayscale(1); opacity: 0.6; }
+        .nav-item.active { color: #d81b60; }
+        .nav-item.active .icon { transform: translateY(-4px) scale(1.1); filter: grayscale(0); opacity: 1; }
+
+        .floating-text { position: absolute; font-weight: bold; font-size: 20px; color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; pointer-events: none; z-index: 100; animation: floatUp 1s forwards ease-out; white-space: nowrap; text-align: center; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.3); } }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- 상단 바 -->
+    <div id="top-bar">
+        <div class="top-stats">
+            <div class="stat-badge merge">🔄 머지: <span id="val-merge">0</span></div>
+            <div class="stat-badge gold">🪙 <span id="val-gold">1,000</span></div>
+            <div class="stat-badge" id="shield-badge" style="gap:2px;"></div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div id="main-content">
+        <!-- 뷰 1: 로비 -->
+        <div id="view-lobby" class="view-container active">
+            <div class="lobby-title-bar">나만의 로비</div>
+            <div class="lobby-char-container" id="lobby-touch-area">
+                <div class="lobby-nav-btn lobby-prev" onclick="prevLobbyChar()">◀</div>
+                <img id="lobby-char-img" class="lobby-char" src="images/character/lobby/animal/01.png" alt="Lobby Character" onerror="this.src='https://via.placeholder.com/300x500?text=Char'">
+                <div class="lobby-nav-btn lobby-next" onclick="nextLobbyChar()">▶</div>
+            </div>
+        </div>
+
+        <!-- 뷰 2: 전투 (머지 공간) -->
+        <div id="view-battle" class="view-container">
+            <div id="board-section">
+                <div id="battle-stage">
+                    <img id="hero" class="hero" src="images/character/battle/01_Idle.png" alt="Hero" onerror="this.src='https://via.placeholder.com/90?text=Hero'">
+                    <div id="enemy" class="character enemy">🦇</div>
+                </div>
+            </div>
+            <div id="game-section">
+                <div id="physics-area">
+                    <div id="fever-banner">🔥 피버 모드! 비용 무료 (10s)</div>
+                    <div id="deadline-line"></div>
+                    <div id="warning-banner">⚠️ 위험! 5.0초</div>
+                    <div id="wipeout-anim">💥</div>
+                    <div id="drop-line"></div>
+                    <img id="preview-ball" src="" alt="preview">
+                </div>
+            </div>
+            <div id="ui-section">                
+                <div class="item-group">
+                    <button class="btn-item btn-mult" id="btn-mult" onclick="toggleMultiplier()">
+                        <span class="icon-main" id="mult-label">x1</span><div style="font-size:10px">배수</div>
+                    </button>
+                    <button class="btn-item btn-hammer" onclick="useItem('hammer')">
+                        <span class="icon-main">🔨</span>망치
+                        <div class="cost-label">🪙 100</div>
+                    </button>
+                    <button class="btn-item btn-auto" id="btn-auto" onclick="toggleAutoDrop()">
+                        <span class="icon-main" style="font-size: 24px; margin-top:-2px;">🤖</span><div id="auto-label">오토: OFF</div>
+                    </button>
+                    <button class="btn-item btn-shake" onclick="useItem('shake')">
+                        <span class="icon-main">🌪️</span>쉐이크
+                        <div class="cost-label">🪙 100</div>
+                    </button>
+                    <button class="btn-item btn-tornado" id="btn-tornado" onclick="useItem('tornado')">
+                        <span class="icon-main">🌀</span>토네이도
+                        <div class="cost-label">🪙 300</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 뷰 3: 캐릭터 뽑기 -->
+        <div id="view-character" class="view-container">
+            <div class="view-title">캐릭터 뽑기</div>
+            <div class="view-content">
+                <div class="panel">
+                    <div class="panel-title">로비 캐릭터 뽑기</div>
+                    <button class="action-btn-main" id="btn-buy-char" onclick="buyCharacter()">
+                        🎁 캐릭터 뽑기<br>
+                        <span style="font-size:13px; color:#27ae60;" id="char-cost-label">요구: 10 🔄 + 10 🪙</span>
+                    </button>
+                    <div class="inventory-grid" id="char-inventory-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 뷰 4: 마이룸 (아이템 관리) -->
+        <div id="view-myroom" class="view-container">
+            <div class="view-title">마이룸 (아이템 인벤토리)</div>
+            <div class="view-content">
+                <div class="panel">
+                    <div class="panel-title">
+                        <span>보급 상자</span>
+                        <span style="font-size:14px; color:#e67e22;" id="item-timer-label">⏳ 01:00</span>
+                    </div>
+                    <button class="action-btn-main" id="btn-claim-item" onclick="claimItem()" disabled>
+                        📦 아이템 획득!<br>
+                        <span style="font-size:13px; color:#27ae60;" id="item-cost-label">요구: 10 🔄</span>
+                    </button>
+                </div>
+                
+                <div class="panel" style="background:#f1f8ff;">
+                    <div class="panel-title" style="font-size:14px; color:#3498db;">🛠️ 아이템 합성 (C x10 ➔ B x1)</div>
+                    <button class="action-btn-main" style="background:#3498db; color:#fff; border-color:#2980b9; box-shadow:0 4px 0 #2980b9; padding:10px;" onclick="craftItem()">
+                        합성하기
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">보유 아이템 (30종)</div>
+                    <div class="inventory-grid" id="item-inventory-grid"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 하단 공통 네비게이션 바 -->
+    <div id="bottom-nav">
+        <div class="nav-item active" id="nav-lobby" onclick="switchMenu('lobby')"><div class="icon">🏛️</div><div>로비</div></div>
+        <div class="nav-item" id="nav-battle" onclick="switchMenu('battle')"><div class="icon">⚔️</div><div>전투</div></div>
+        <div class="nav-item" id="nav-character" onclick="switchMenu('character')"><div class="icon">🐾</div><div>캐릭터</div></div>
+        <div class="nav-item" id="nav-myroom" onclick="switchMenu('myroom')"><div class="icon">🛋️</div><div>마이룸</div></div>
+    </div>
+
+    <!-- 간식서리 미니게임 오버레이 -->
+    <div id="minigame-overlay">
+        <div style="font-size: 24px; font-weight: bold; color: #f6e58d;">🥨 간식서리 이벤트! 🥨</div>
+        <div style="font-size: 13px; color: #ddd; margin-top: 5px; text-align: center;">같은 간식을 3개 맞추면 보상 획득!</div>
+        <div id="auto-heist-msg">3초 후 자동 진행...</div>
+        
+        <div class="reward-container">
+            <div class="reward-item" id="reward-🍰"><div class="emoji">🍰</div><div class="gold">200🪙</div><div class="count" id="count-🍰">0/3</div></div>
+            <div class="reward-item" id="reward-🍕"><div class="emoji">🍕</div><div class="gold">150🪙</div><div class="count" id="count-🍕">0/3</div></div>
+            <div class="reward-item" id="reward-🍿"><div class="emoji">🍿</div><div class="gold">100🪙</div><div class="count" id="count-🍿">0/3</div></div>
+        </div>
+        <div class="memory-grid" id="memory-grid"></div>
+    </div>
+    
+    <!-- 글로벌 정지 & 이벤트 오버레이 -->
+    <div id="event-overlay"></div>
+    <div id="event-result"></div>
+</div>
+
+<script>
+    // ================= [ 글로벌 상태 및 정지 매니저 ] =================
+    let globalPause = false;
+    let mergeCount = 0; 
+    let gold = 1000; // 초기 골드 1000
+    let shields = 4;
+    const MAX_SHIELDS = 4;
+
+    function setGlobalPause(isPause) {
+        globalPause = isPause;
+        if (window.gameEngine) {
+            window.gameEngine.timing.timeScale = isPause ? 0 : 1; // 물리엔진 멈춤/재개
+        }
+    }
+
+    const uiMerge = document.getElementById('val-merge');
+    const uiGold = document.getElementById('val-gold');
+
+    function updateTopUI() {
+        uiMerge.innerText = mergeCount.toLocaleString();
+        uiGold.innerText = gold.toLocaleString();
+    }
+    
+    function updateShieldUI() {
+        let html = '';
+        for(let i = 0; i < MAX_SHIELDS; i++) {
+            if(i < shields) html += '<span style="font-size:14px;">🐶</span>';
+            else html += '<span style="font-size:14px; opacity:0.3; filter:grayscale(1);">🐶</span>';
+        }
+        document.getElementById('shield-badge').innerHTML = html;
+    }
+    updateTopUI(); updateShieldUI();
+
+    // ================= [ 데이터베이스 및 경제 시스템 ] =================
+    let multiplier = 1;
+    const multList = [1, 2, 5, 10];
+    let multIndex = 0;
+
+    // 캐릭터 뽑기 시스템 (로비 캐릭터 6종 기준)
+    let charCostMerge = 10;
+    let charCostGold = 10;
+    let charInventory = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 }; // id: count
+    const LOBBY_CHARS = [
+        'images/character/lobby/animal/01.png', 'images/character/lobby/animal/02.png',
+        'images/character/lobby/animal/03.png', 'images/character/lobby/animal/04.png',
+        'images/character/lobby/animal/05.png', 'images/character/lobby/animal/06.png'
+    ];
+
+    // 아이템 시스템 (30종)
+    const ITEMS_DB = {
+        SS: ['🌌'],
+        S:  ['🐉', '🦄'],
+        A:  ['🚀', '🛸', '🚁', '🛰️', '🎠'],
+        B:  ['💎', '💍', '👑', '🎩', '🔮', '🧿', '🏺'],
+        C:  ['🪴', '🧸', '📚', '☕', '📺', '🎸', '🕹️', '🐈', '🖼️', '🕰️', '🛋️', '🛏️', '🌵', '📻', '🛹']
+    };
+    let itemInventory = {};
+    // 인벤토리 초기화
+    Object.keys(ITEMS_DB).forEach(tier => { ITEMS_DB[tier].forEach(item => itemInventory[item] = { tier: tier, count: 0 }); });
+    
+    let itemCostMerge = 10;
+    let itemTimer = 60; // 1분 = 60초
+
+    // ================= [ 타이머 루프 (글로벌 매니저) ] =================
+    setInterval(() => {
+        if (globalPause) return; // 이벤트 중 시간 멈춤
+
+        // 1. 아이템 획득 타이머
+        if (itemTimer > 0) {
+            itemTimer--;
+            let mins = Math.floor(itemTimer / 60).toString().padStart(2, '0');
+            let secs = (itemTimer % 60).toString().padStart(2, '0');
+            document.getElementById('item-timer-label').innerText = `⏳ ${mins}:${secs}`;
+        }
+        updateItemUI();
+
+        // 2. 간식서리 오토 모드
+        if (isMinigameActive && !snackAutoMode) {
+            snackWaitTimer--;
+            if (snackWaitTimer <= 0) {
+                snackAutoMode = true;
+                document.getElementById('auto-heist-msg').innerText = "🤖 자동 진행 중...";
+            } else {
+                document.getElementById('auto-heist-msg').innerText = `${snackWaitTimer}초 후 자동 진행...`;
+            }
+        }
+        if (snackAutoMode && !lockBoard && isMinigameActive) {
+            snackTickTimer--;
+            if (snackTickTimer <= 0) {
+                snackTickTimer = 1; // 0.5초(인터벌이 1초라 여기서 맞추면 좀 느림. 아래에서 100ms로 제어)
+            }
+        }
+    }, 1000);
+
+    // 더 정밀한 오토 루프 (0.1초 단위)
+    let autoDropTick = 0;
+    let snackFlipTick = 0;
+    setInterval(() => {
+        if (globalPause) return;
+
+        // 오토 드롭 로직
+        if (isAutoDrop && currentMenu === 'battle' && !isGameOver && !isCrisis && !isMinigameActive) {
+            autoDropTick++;
+            if (autoDropTick >= 6) { // 0.6초마다
+                autoDropTick = 0;
+                if (canDrop) executeDrop(Math.random() * 420);
+            }
+        }
+
+        // 간식서리 카드 자동 뒤집기 로직 (0.5초)
+        if (isMinigameActive && snackAutoMode && !lockBoard) {
+            snackFlipTick++;
+            if (snackFlipTick >= 5) { // 0.5초마다
+                snackFlipTick = 0;
+                const unflipped = Array.from(document.querySelectorAll('.memory-card:not(.flipped)'));
+                if (unflipped.length > 0) {
+                    const randomCard = unflipped[Math.floor(Math.random() * unflipped.length)];
+                    flipCard(randomCard);
+                }
+            }
+        }
+    }, 100);
+
+    // ================= [ 캐릭터 & 아이템 UI 로직 ] =================
+    function updateCharUI() {
+        document.getElementById('char-cost-label').innerText = `요구: ${charCostMerge.toLocaleString()} 🔄 + ${charCostGold.toLocaleString()} 🪙`;
+        const grid = document.getElementById('char-inventory-grid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= 6; i++) {
+            const count = charInventory[i];
+            const div = document.createElement('div');
+            div.className = `inv-item ${count === 0 ? 'unowned' : ''}`;
+            div.innerHTML = `
+                <img src="images/character/lobby/animal/0${i}.png" style="width:40px; height:40px; object-fit:contain;" onerror="this.src='https://via.placeholder.com/40'">
+                ${count > 0 ? `<div class="count">${count}</div>` : ''}
+            `;
+            grid.appendChild(div);
+        }
+    }
+
+    window.buyCharacter = function() {
+        if (mergeCount < charCostMerge || gold < charCostGold) {
+            showFloatingText("머지 횟수나 골드가 부족합니다!", 210, 400, "#ff7675");
+            return;
+        }
+        // 구매 처리
+        gold -= charCostGold;
+        // 요구사항은 10배씩 증가
+        charCostMerge *= 10;
+        charCostGold *= 10;
+        
+        // 1~6 랜덤 뽑기
+        const picked = Math.floor(Math.random() * 6) + 1;
+        charInventory[picked]++;
+        
+        updateTopUI();
+        updateCharUI();
+        showFloatingText("캐릭터 획득! 🎉", 210, 350, "#1dd1a1");
+    }
+
+    function updateItemUI() {
+        const btn = document.getElementById('btn-claim-item');
+        const costLabel = document.getElementById('item-cost-label');
+        
+        costLabel.innerText = `요구: ${itemCostMerge.toLocaleString()} 🔄`;
+        
+        if (itemTimer <= 0 && mergeCount >= itemCostMerge) {
+            btn.disabled = false;
+            btn.innerHTML = `📦 아이템 획득!<br><span style="font-size:13px; color:#fff;">클릭하여 열기</span>`;
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = `📦 아이템 대기중<br><span style="font-size:13px; color:#999;">${itemCostMerge.toLocaleString()} 🔄 필요</span>`;
+        }
+
+        const grid = document.getElementById('item-inventory-grid');
+        grid.innerHTML = '';
+        
+        // C -> SS 순으로 정렬해서 표시
+        const renderOrder = ['C', 'B', 'A', 'S', 'SS'];
+        renderOrder.forEach(tier => {
+            ITEMS_DB[tier].forEach(item => {
+                const data = itemInventory[item];
+                const div = document.createElement('div');
+                div.className = `inv-item ${data.count === 0 ? 'unowned' : ''}`;
+                div.innerHTML = `
+                    <div class="tier-label tier-${tier}">${tier}</div>
+                    <div class="emoji">${item}</div>
+                    ${data.count > 0 ? `<div class="count">${data.count}</div>` : ''}
+                `;
+                grid.appendChild(div);
+            });
+        });
+    }
+
+    window.claimItem = function() {
+        if (itemTimer > 0 || mergeCount < itemCostMerge) return;
+        
+        // 시간 초기화 및 비용 증가 (5배)
+        itemCostMerge *= 5;
+        itemTimer = 60; // 다시 1분 대기
+        
+        // 티어 확률 (가챠)
+        const rand = Math.random() * 100;
+        let pickedTier = 'C';
+        if (rand < 0.1) pickedTier = 'SS';
+        else if (rand < 5) pickedTier = 'S';
+        else if (rand < 15) pickedTier = 'A';
+        else if (rand < 40) pickedTier = 'B';
+        
+        const pool = ITEMS_DB[pickedTier];
+        const pickedItem = pool[Math.floor(Math.random() * pool.length)];
+        
+        itemInventory[pickedItem].count++;
+        
+        updateTopUI();
+        updateItemUI();
+        
+        setGlobalPause(true);
+        const resultEl = document.getElementById('event-result');
+        resultEl.innerHTML = `
+            <div style="font-size:80px; animation: popZoom 0.5s forwards;">${pickedItem}</div>
+            <div style="font-size:24px; color:#f6e58d; font-weight:bold; margin-top:10px;">${pickedTier} 랭크 아이템 획득!</div>
+        `;
+        document.getElementById('event-overlay').style.display = 'block';
+        resultEl.style.display = 'flex';
+        resultEl.className = 'pop-zoom';
+        
+        setTimeout(() => {
+            document.getElementById('event-overlay').style.display = 'none';
+            resultEl.style.display = 'none';
+            setGlobalPause(false);
+        }, 2000);
+    }
+
+    window.craftItem = function() {
+        // C 아이템 총합 확인
+        let totalC = 0;
+        ITEMS_DB['C'].forEach(item => totalC += itemInventory[item].count);
+        
+        if (totalC < 10) {
+            showFloatingText("C티어 아이템이 10개 필요합니다!", 210, 400, "#ff7675");
+            return;
+        }
+        
+        // C 아이템 10개 차감
+        let toDeduct = 10;
+        for (let i = 0; i < ITEMS_DB['C'].length; i++) {
+            const item = ITEMS_DB['C'][i];
+            while (itemInventory[item].count > 0 && toDeduct > 0) {
+                itemInventory[item].count--;
+                toDeduct--;
+            }
+            if (toDeduct === 0) break;
+        }
+        
+        // B 아이템 1개 랜덤 지급
+        const pool = ITEMS_DB['B'];
+        const pickedItem = pool[Math.floor(Math.random() * pool.length)];
+        itemInventory[pickedItem].count++;
+        
+        updateItemUI();
+        
+        setGlobalPause(true);
+        const resultEl = document.getElementById('event-result');
+        resultEl.innerHTML = `
+            <div style="font-size:80px; animation: popZoom 0.5s forwards;">${pickedItem}</div>
+            <div style="font-size:24px; color:#3498db; font-weight:bold; margin-top:10px;">합성 성공! B 랭크 획득!</div>
+        `;
+        document.getElementById('event-overlay').style.display = 'block';
+        resultEl.style.display = 'flex';
+        resultEl.className = 'pop-zoom';
+        setTimeout(() => { document.getElementById('event-overlay').style.display = 'none'; resultEl.style.display = 'none'; setGlobalPause(false); }, 2000);
+    }
+
+    // 초기 UI 세팅
+    updateCharUI(); updateItemUI();
+
+    // ================= [ 네비게이션 및 메뉴 ] =================
+    let currentMenu = 'lobby'; 
+    window.switchMenu = function(menuId) {
+        currentMenu = menuId;
+        document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active')); 
+        document.getElementById('view-' + menuId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
+        document.getElementById('nav-' + menuId).classList.add('active');
+        
+        if (menuId === 'character') updateCharUI(); 
+        if (menuId === 'myroom') updateItemUI();
+    }
+
+    // ================= [ 로비 스와이프 로직 ] =================
+    let currentLobbyCharIdx = 0;
+    const lobbyCharImg = document.getElementById('lobby-char-img');
+    function updateLobbyChar() {
+        lobbyCharImg.style.opacity = 0;
+        setTimeout(() => { lobbyCharImg.src = LOBBY_CHARS[currentLobbyCharIdx]; lobbyCharImg.style.opacity = 1; }, 150);
+    }
+    window.prevLobbyChar = function() { currentLobbyCharIdx = (currentLobbyCharIdx - 1 + LOBBY_CHARS.length) % LOBBY_CHARS.length; updateLobbyChar(); }
+    window.nextLobbyChar = function() { currentLobbyCharIdx = (currentLobbyCharIdx + 1) % LOBBY_CHARS.length; updateLobbyChar(); }
+
+    // ================= [ 💡 간식서리 미니게임 스크립트 ] =================
+    let lockBoard = false; let foundCounts = {};
+    let isMinigameActive = false;
+    let snackWaitTimer = 3;
+    let snackAutoMode = false;
+    
+    function updateRewardUI(emoji) {
+        const count = foundCounts[emoji]; const item = document.getElementById(`reward-${emoji}`); const countText = document.getElementById(`count-${emoji}`);
+        countText.innerText = `${count}/3`;
+        if (count === 1) { item.style.filter = 'grayscale(0.6)'; item.style.opacity = '0.8'; } 
+        else if (count === 2) { item.style.filter = 'grayscale(0.3)'; item.style.opacity = '0.9'; } 
+        else if (count >= 3) { item.style.filter = 'grayscale(0)'; item.style.opacity = '1'; item.style.background = 'rgba(255, 255, 255, 0.3)'; item.style.borderColor = '#f6e58d'; }
+    }
+
+    function triggerSnackHeistEvent() {
+        setGlobalPause(true); // 배경 멈춤
+        isMinigameActive = true; snackAutoMode = false; snackWaitTimer = 3; lockBoard = false;
+        foundCounts = { '🍰': 0, '🍕': 0, '🍿': 0 };
+        document.getElementById('auto-heist-msg').innerText = "3초 후 자동 진행...";
+
+        const overlay = document.getElementById('minigame-overlay'); const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
+        ['🍰', '🍕', '🍿'].forEach(emoji => {
+            const item = document.getElementById(`reward-${emoji}`); const countText = document.getElementById(`count-${emoji}`);
+            item.style.filter = 'grayscale(1)'; item.style.opacity = '0.6'; countText.innerText = '0/3';
+            item.style.background = 'rgba(255,255,255,0.1)'; item.style.borderColor = 'rgba(255,255,255,0.3)';
+        });
+        document.getElementById('minigame-result').style.display = 'none'; document.getElementById('minigame-result').className = ''; overlay.style.display = 'flex';
+        
+        let cardEmojis = [ '🍰', '🍰', '🍰', '🍕', '🍕', '🍕', '🍿', '🍿', '🍿' ];
+        cardEmojis.sort(() => Math.random() - 0.5);
+        cardEmojis.forEach((emoji) => {
+            const card = document.createElement('div'); card.className = 'memory-card'; card.dataset.emoji = emoji; card.innerText = '❓';
+            card.onclick = () => { snackAutoMode = false; snackWaitTimer = 3; flipCard(card); }; // 터치 시 오토 취소 및 연장
+            grid.appendChild(card);
+        });
+    }
+
+    window.flipCard = function(card) {
+        if (card.classList.contains('flipped') || lockBoard) return;
+        card.classList.add('flipped'); const emoji = card.dataset.emoji; card.innerText = emoji;
+        foundCounts[emoji]++; updateRewardUI(emoji);
+
+        if (foundCounts[emoji] === 3) {
+            lockBoard = true; let baseReward = 0;
+            if (emoji === '🍰') baseReward = 200; else if (emoji === '🍕') baseReward = 150; else if (emoji === '🍿') baseReward = 100;
+            const finalReward = baseReward * multiplier; const resultEl = document.getElementById('minigame-result');
+            resultEl.innerHTML = ` <div style="font-size:60px; margin-bottom:10px;">🎉</div><div style="color:#f6e58d;">간식서리 대성공!</div><div style="font-size:24px; color:#1dd1a1; margin-top:5px;">+${finalReward} 🪙</div> `;
+            resultEl.style.display = 'flex'; resultEl.className = 'pop-zoom';
+            
+            for(let i=0; i<15; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div'); conf.innerText = emoji; conf.style.position = 'absolute';
+                    conf.style.left = (Math.random() * 80 + 10) + '%'; conf.style.top = (Math.random() * 80 + 10) + '%';
+                    conf.style.fontSize = (20 + Math.random() * 20) + 'px'; conf.style.pointerEvents = 'none'; conf.style.animation = 'floatUp 1s forwards ease-out';
+                    resultEl.appendChild(conf);
+                }, i * 50);
+            }
+            setTimeout(() => {
+                gold += finalReward; updateTopUI(); document.getElementById('minigame-overlay').style.display = 'none';
+                resultEl.style.display = 'none'; isMinigameActive = false; lockBoard = false;
+                setGlobalPause(false); // 배경 재개
+            }, 2500);
+        }
+    }
+
+    // ================= [ 타격감 및 전투 시스템 ] =================
+    window.toggleMultiplier = function() {
+        multIndex = (multIndex + 1) % multList.length; multiplier = multList[multIndex]; document.getElementById('mult-label').innerText = 'x' + multiplier;
+        const btn = document.getElementById('btn-mult'); btn.style.transform = 'translateY(4px)'; setTimeout(() => btn.style.transform = 'translateY(0)', 100);
+    }
+
+    function createMergeEffect(x, y, level) {
+        const effectContainer = document.createElement('div');
+        effectContainer.style.position = 'absolute'; effectContainer.style.left = x + 'px'; effectContainer.style.top = y + 'px';
+        effectContainer.style.pointerEvents = 'none'; effectContainer.style.zIndex = '15';
+
+        const size = 30 + (level * 10);
+        const flash = document.createElement('div');
+        flash.style.position = 'absolute'; flash.style.width = size + 'px'; flash.style.height = size + 'px';
+        flash.style.background = 'radial-gradient(circle, rgba(255,255,255,1) 20%, rgba(255,255,255,0) 80%)';
+        flash.style.borderRadius = '50%'; flash.style.animation = 'whiteFlash 0.3s ease-out forwards';
+        
+        const ring = document.createElement('div');
+        ring.style.position = 'absolute'; ring.style.width = size + 'px'; ring.style.height = size + 'px';
+        ring.style.borderRadius = '50%'; ring.style.boxShadow = '0 0 10px #fff, inset 0 0 10px #fff';
+        ring.style.animation = 'ringExpand 0.4s ease-out forwards';
+
+        effectContainer.appendChild(flash); effectContainer.appendChild(ring);
+        document.getElementById('physics-area').appendChild(effectContainer);
+        setTimeout(() => effectContainer.remove(), 400);
+
+        if (level >= 4) { document.getElementById('app').classList.add('merge-shake'); setTimeout(() => document.getElementById('app').classList.remove('merge-shake'), 150); }
+    }
+
+    function showFloatingText(text, x, y, color = '#fff') {
+        const el = document.createElement('div'); el.className = 'floating-text'; el.innerHTML = text;
+        el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.color = color;
+        document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+    }
+
+    function showEventOverlay(emoji, htmlMsg, duration, color) {
+        setGlobalPause(true);
+        const overlay = document.getElementById('event-overlay'); const resultEl = document.getElementById('event-result');
+        resultEl.innerHTML = ` <div style="font-size:80px; margin-bottom:10px; animation: popZoom 0.5s forwards;">${emoji}</div><div style="font-size:20px; font-weight:900; color:${color}; text-shadow: 0 4px 10px rgba(0,0,0,0.8);">${htmlMsg}</div> `;
+        overlay.style.display = 'block'; resultEl.style.display = 'flex'; resultEl.className = 'pop-zoom';
+        
+        setTimeout(() => { overlay.style.display = 'none'; resultEl.style.display = 'none'; setGlobalPause(false); }, duration);
+    }
+
+    const heroEl = document.getElementById('hero');
+    const enemyEl = document.getElementById('enemy');
+    let isFeverMode = false;
+
+    function triggerBattle() {
+        if (isBattling || isMinigameActive || globalPause) return; 
+        isBattling = true;
+
+        const enemies = ['🦇', '🦹‍♂️', '👾', '🧛', '🧟', '🐉', '🐲'];
+        enemyEl.innerText = enemies[Math.floor(Math.random() * enemies.length)];
+        enemyEl.className = 'character enemy slide-in';
+
+        setTimeout(() => {
+            heroEl.src = 'images/character/battle/01_Attack.png'; heroEl.classList.add('attack');
+            setTimeout(() => {
+                heroEl.src = 'images/character/battle/01_Idle.png'; heroEl.classList.remove('attack'); 
+                enemyEl.className = 'character enemy explode';
+
+                const rand = Math.floor(Math.random() * 12);
+                let rewardText = null; let rewardColor = "#fff";
+                const rect = enemyEl.getBoundingClientRect(); 
+                
+                if (rand === 0) { 
+                    enemyEl.className = 'character enemy'; isBattling = false; triggerSnackHeistEvent(); return;
+                } else if (rand === 1) { 
+                    rewardText = `처치! ⚔️`; rewardColor = "#fff"; 
+                } else if (rand === 2) { 
+                    let msg = "";
+                    if (shields > 0) { shields -= 1; msg = "방어가 뚫렸습니다...<br><span style='color:#ff7675'>방패 -1 🐶</span>"; } 
+                    else { gold -= 50; msg = "방패 소진! 마이룸 피해 발생<br><span style='color:#ff7675'>-50 🪙</span>"; }
+                    updateShieldUI(); showEventOverlay("😭", msg, 2000, "#ff7675");
+                } else if (rand === 3) { 
+                    const gained = 1 * multiplier; let actualGained = 0;
+                    if (shields + gained <= MAX_SHIELDS) { shields += gained; actualGained = gained; } 
+                    else { actualGained = MAX_SHIELDS - shields; shields = MAX_SHIELDS; }
+                    updateShieldUI(); updateTopUI();
+                    showEventOverlay("🎉", `방패 획득!<br><span style='color:#b9f6ca'>+${actualGained} 🐶</span>`, 2000, "#b9f6ca");
+                } else if (rand >= 4 && rand <= 7) { 
+                    const amount = 100 * multiplier; gold += amount; rewardText = `+${amount} 🪙`; rewardColor = "#f6e58d"; 
+                } else if (rand === 8 || rand === 9) { 
+                    const amount = 20; gold -= amount; rewardText = `-${amount} 🪙`; rewardColor = "#ff7675"; 
+                } else { 
+                    // 에너지가 사라졌으므로 골드로 대체 또는 꽝
+                    rewardText = `빗나감!`; rewardColor = "#ccc"; 
+                }
+                
+                updateTopUI();
+                if (rewardText !== null) { showFloatingText(rewardText, rect.left - 20, rect.top + 30, rewardColor); }
+                setTimeout(() => { enemyEl.className = 'character enemy'; if (rewardText !== null) isBattling = false; }, 400);
+                if (rewardText === null) { setTimeout(() => { isBattling = false; }, 2000); }
+            }, 150); 
+        }, 200); 
+    }
+
+    // ================= [ 물리 엔진 Init ] =================
+    const baseImgSize = 256;
+    let LEVELS = [
+        { radius: 12, img: 'images/bead/animal/lv01.png' }, { radius: 18, img: 'images/bead/animal/lv02.png' },
+        { radius: 25, img: 'images/bead/animal/lv03.png' }, { radius: 33, img: 'images/bead/animal/lv04.png' },
+        { radius: 42, img: 'images/bead/animal/lv05.png' }, { radius: 52, img: 'images/bead/animal/lv06.png' },
+        { radius: 62, img: 'images/bead/animal/lv07.png' }, { radius: 75, img: 'images/bead/animal/lv08.png' },
+        { radius: 90, img: 'images/bead/animal/lv09.png' }, { radius: 108, img: 'images/bead/animal/lv10.png' },
+        { radius: 125, img: 'images/bead/animal/lv11.png' }, { radius: 145, img: 'images/bead/animal/lv12.png' }
+    ].map(level => { level.scale = (level.radius * 2) / baseImgSize; return level; });
+
+    let isAutoDrop = false;
+    let canDrop = true;
+    let isGameOver = false;
+    let isCrisis = false;
+    let isWarning = false;
+    
+    // 토네이도 스킬 변수
+    let tornadoTicks = 0;
+    let dangerMuteTimer = 0; // 위험선 감지 무시 타이머
+
+    window.onload = () => {
+        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Composite = Matter.Composite, Events = Matter.Events;
+        
+        const physicsArea = document.getElementById('physics-area');
+        // 고정 크기이므로 미리 크기를 명확히 지정해버려도 됨. (app=420x800 기준)
+        const width = 386; // 420px * 92% (left 4 right 4)
+        const height = 413; // 460px (game-section height appx) * 88%
+
+        const engine = Engine.create({ enableSleeping: false }); const world = engine.world;
+        window.gameEngine = engine;
+        
+        const render = Render.create({
+            element: physicsArea, engine: engine,
+            options: { width: width, height: height, wireframes: false, background: 'transparent', pixelRatio: window.devicePixelRatio }
+        });
+
+        Render.run(render); Runner.run(Runner.create(), engine);
+
+        const wallOptions = { isStatic: true, render: { fillStyle: 'transparent' } };
+        const floor = Bodies.rectangle(width / 2, height + 50, width * 5, 100, wallOptions);
+        const leftWall = Bodies.rectangle(-50, height / 2, 100, height * 5, wallOptions);
+        const rightWall = Bodies.rectangle(width + 50, height / 2, 100, height * 5, wallOptions);
+        
+        Composite.add(world, [floor, leftWall, rightWall]);
+
+        // 토네이도 (Tornado) 물리 효과 부여
+        Events.on(engine, 'beforeUpdate', () => {
+            if (globalPause) return;
+            
+            if (dangerMuteTimer > 0) dangerMuteTimer--;
+
+            if (tornadoTicks > 0) {
+                tornadoTicks--;
+                const allBalls = Composite.allBodies(world).filter(b => b.level !== undefined);
+                const cx = width / 2;
+                allBalls.forEach(b => {
+                    const dx = cx - b.position.x;
+                    // X축으로 끌어들이고 Y축으로 위로 띄움
+                    Matter.Body.applyForce(b, b.position, { 
+                        x: dx * 0.00003 + (Math.random() - 0.5) * 0.0005 * b.mass, 
+                        y: -0.002 * b.mass 
+                    });
+                });
+            }
+        });
+
+        window.useItem = function(itemType) {
+            if (isGameOver || isCrisis || globalPause || currentMenu !== 'battle') return; 
+            
+            let cost = 100;
+            if (itemType === 'tornado') cost = 300;
+
+            if (gold < cost) { showFloatingText("골드가 부족합니다!", 210, 400, "#ff7675"); return; }
+            gold -= cost; updateTopUI();
+
+            const allBalls = Composite.allBodies(world).filter(b => b.level !== undefined);
+            
+            if (itemType === 'hammer') {
+                if(allBalls.length > 0) {
+                    const target = allBalls[Math.floor(Math.random() * allBalls.length)];
+                    const reward = (target.level + 1) * 30; gold += reward; updateTopUI(); Composite.remove(world, target); 
+                    showFloatingText(`뿅망치! +${reward}🪙`, target.position.x, target.position.y + 200, '#f6e58d');
+                }
+            } else if (itemType === 'shake') {
+                allBalls.forEach(b => { const force = 0.12 * b.mass; Matter.Body.applyForce(b, b.position, { x: (Math.random() - 0.5) * force, y: -force * 1.8 }); });
+                showFloatingText(`쉐이크 🌪️`, 210, 400);
+            } else if (itemType === 'tornado') {
+                if (tornadoTicks > 0) return;
+                showFloatingText(`토네이도 발동! 🌀`, 210, 400, "#78e08f");
+                tornadoTicks = 180; // 60fps * 3s
+                dangerMuteTimer = 300; // 5s 동안 무적 (올라갔다 떨어지는 시간 고려)
+                
+                const btn = document.getElementById('btn-tornado');
+                btn.classList.add('active');
+                setTimeout(() => btn.classList.remove('active'), 3000);
+            }
+        };
+
+        const dropLine = document.getElementById('drop-line'); const previewImg = document.getElementById('preview-ball');
+        let nextDropLevel = Math.floor(Math.random() * 2); let lastMouseX = width / 2; 
+
+        window.updatePreview = function() {
+            const data = LEVELS[nextDropLevel]; previewImg.src = data.img; previewImg.style.width = (data.radius * 2) + 'px'; previewImg.style.height = (data.radius * 2) + 'px';
+            if (!isAutoDrop && currentMenu === 'battle' && !isGameOver && !isCrisis && !globalPause) previewImg.style.display = 'block';
+            else previewImg.style.display = 'none';
+        }
+        updatePreview();
+
+        physicsArea.addEventListener('pointerdown', (e) => { 
+            if (isAutoDrop || currentMenu !== 'battle' || isGameOver || isCrisis || globalPause || !canDrop) return;
+            const rect = physicsArea.getBoundingClientRect(); lastMouseX = e.clientX - rect.left;
+            dropLine.style.display = 'block'; dropLine.style.left = lastMouseX + 'px'; previewImg.style.left = lastMouseX + 'px';
+        });
+        physicsArea.addEventListener('pointermove', (e) => {
+            if(isAutoDrop || currentMenu !== 'battle' || isGameOver || isCrisis || globalPause || !canDrop) return;
+            const rect = physicsArea.getBoundingClientRect(); lastMouseX = e.clientX - rect.left;
+            dropLine.style.display = 'block'; dropLine.style.left = lastMouseX + 'px'; previewImg.style.left = lastMouseX + 'px';
+        });
+        physicsArea.addEventListener('pointerleave', () => { dropLine.style.display = 'none'; });
+        physicsArea.addEventListener('pointerup', () => { 
+            if (isAutoDrop || currentMenu !== 'battle' || isGameOver || isCrisis || globalPause || !canDrop) return; 
+            window.executeDrop(lastMouseX); 
+        });
+
+        window.executeDrop = function(xPos) {
+            const levelData = LEVELS[nextDropLevel]; const startX = Math.min(Math.max(xPos, levelData.radius), width - levelData.radius);
+            const body = Bodies.circle(startX, 20, levelData.radius, {
+                restitution: 0.3, friction: 0.1, render: { sprite: { texture: levelData.img, xScale: levelData.scale, yScale: levelData.scale } }
+            });
+            body.level = nextDropLevel; body.isMerging = false; body.spawnTime = Date.now();
+            Composite.add(world, body);
+
+            canDrop = false; previewImg.style.display = 'none'; dropLine.style.display = 'none';
+            setTimeout(() => { canDrop = true; nextDropLevel = Math.floor(Math.random() * 2); updatePreview(); }, 500);
+        }
+
+        window.toggleAutoDrop = function() {
+            isAutoDrop = !isAutoDrop; const btnAuto = document.getElementById('btn-auto');
+            if (isAutoDrop) {
+                btnAuto.classList.add('active'); document.getElementById('auto-label').innerText = '오토: ON'; previewImg.style.display = 'none'; dropLine.style.display = 'none';
+                showFloatingText(`오토 드롭 ON! 🤖`, 210, 400);
+            } else {
+                btnAuto.classList.remove('active'); document.getElementById('auto-label').innerText = '오토: OFF'; updatePreview();
+            }
+        }
+
+        Events.on(engine, 'collisionStart', (event) => {
+            const pairs = event.pairs;
+            for (let i = 0; i < pairs.length; i++) {
+                const bodyA = pairs[i].bodyA; const bodyB = pairs[i].bodyB;
+                if (bodyA.level !== undefined && bodyB.level !== undefined && bodyA.level === bodyB.level && !bodyA.isMerging && !bodyB.isMerging && bodyA.level < LEVELS.length - 1) {
+                    bodyA.isMerging = true; bodyB.isMerging = true; const nextLevel = bodyA.level + 1;
+                    
+                    setTimeout(() => {
+                        const midX = (bodyA.position.x + bodyB.position.x) / 2; const midY = (bodyA.position.y + bodyB.position.y) / 2;
+                        Composite.remove(world, [bodyA, bodyB]);
+                        const nextLevelData = LEVELS[nextLevel];
+                        const newBody = Bodies.circle(midX, midY, nextLevelData.radius, {
+                            restitution: 0.3, render: { sprite: { texture: nextLevelData.img, xScale: nextLevelData.scale, yScale: nextLevelData.scale } }
+                        });
+                        newBody.level = nextLevel; newBody.isMerging = false; newBody.spawnTime = Date.now(); 
+                        
+                        Matter.Body.setVelocity(newBody, { x: 0, y: -2.5 }); Composite.add(world, newBody); 
+                        createMergeEffect(midX, midY, nextLevel); 
+                        
+                        mergeCount++; // 🔄 머지 횟수 증가
+                        updateTopUI();
+                        updateItemUI(); // 아이템 버튼 활성화 여부 업데이트
+                        triggerBattle(); // 무작위 전투/보상
+                    }, 10);
+                }
+            }
+        });
+
+        // 데드라인 감지 (토네이도 발동 중 무시)
+        let warningTimeRemaining = 5.0;
+        let warningInterval = null;
+        const DEADLINE_Y = 45;
+        const warningBanner = document.getElementById('warning-banner');
+
+        setInterval(() => {
+            if (isGameOver || isCrisis || globalPause || dangerMuteTimer > 0) {
+                if (isWarning) { isWarning = false; warningBanner.style.display = 'none'; }
+                return;
+            }
+            const bodies = Composite.allBodies(world).filter(b => b.level !== undefined && !b.isStatic);
+            let isOverflow = false; const now = Date.now();
+            for (let b of bodies) {
+                if (now - b.spawnTime > 1000 && b.position.y - LEVELS[b.level].radius <= DEADLINE_Y && Math.abs(b.velocity.y) < 0.3) { isOverflow = true; break; }
+            }
+
+            if (isOverflow && !isWarning) {
+                isWarning = true; warningTimeRemaining = 5.0; warningBanner.style.display = 'block';
+            } else if (isOverflow && isWarning) {
+                warningTimeRemaining -= 0.1; warningBanner.innerText = `⚠️ 위험! ${Math.max(0, warningTimeRemaining).toFixed(1)}초`;
+                if (warningTimeRemaining <= 0) {
+                    isCrisis = true; isWarning = false; warningBanner.style.display = 'none';
+                    if(isAutoDrop) toggleAutoDrop(); setGlobalPause(true); document.getElementById('overlay-crisis').style.display = 'flex';
+                }
+            } else if (!isOverflow && isWarning) { 
+                isWarning = false; warningBanner.style.display = 'none'; 
+            }
+        }, 100);
+
+        window.rescueGame = function() {
+            if (gold < 500) { showFloatingText("골드가 부족합니다! (필요: 500🪙)", 210, 400, "#ff7675"); return; }
+            gold -= 500; updateTopUI();
+            document.getElementById('overlay-crisis').style.display = 'none';
+            let bodies = Composite.allBodies(world).filter(b => b.level !== undefined);
+            bodies.sort((a, b) => a.position.y - b.position.y);
+            const targets = bodies.slice(0, 3);
+            Composite.remove(world, targets);
+            isCrisis = false; setGlobalPause(false);
+            showFloatingText(`위기 탈출!`, 210, 400, '#1dd1a1');
+        }
+
+        window.giveUpGame = function() {
+            document.getElementById('overlay-crisis').style.display = 'none'; isGameOver = true; setGlobalPause(false);
+            
+            heroEl.style.filter = 'grayscale(1) brightness(0.6)';
+            document.getElementById('wipeout-anim').style.display = 'block'; document.getElementById('app').classList.add('shake-active');
+
+            setTimeout(() => {
+                const bodies = Composite.allBodies(world).filter(b => b.level !== undefined); Composite.remove(world, bodies);
+                document.getElementById('wipeout-anim').style.display = 'none'; document.getElementById('app').classList.remove('shake-active'); 
+                heroEl.style.filter = 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))'; 
+                
+                showFloatingText(`싹쓸이 완료! 새 판 시작`, 210, 400, '#fff');
+                setTimeout(() => { isGameOver = false; isCrisis = false; updatePreview(); }, 500);
+            }, 1000);
+        }
+    };
+</script>
+</body>
+</html>
