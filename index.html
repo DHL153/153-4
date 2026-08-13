@@ -47,7 +47,7 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 15px; background: #fff; border-bottom: 2px solid #e8dff5; flex-shrink: 0; z-index: 20;
         }
-        .top-stats { display: flex; gap: 8px; align-items: center; width: 100%; justify-content: flex-end;}
+        .top-stats { display: flex; gap: 8px; align-items: center; justify-content: flex-end;}
         .stat-badge { 
             background: #fdfbf7; padding: 6px 10px; border-radius: 10px; 
             font-size: 14px; font-weight: bold; border: 1px solid #e8dff5; display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -114,8 +114,9 @@
             height: 90px; width: auto; object-fit: contain;
             filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); 
             transition: all 0.15s ease-out; z-index: 5;
+            transform-origin: center bottom;
         }
-        .hero.attack { transform: translateX(50px) rotate(15deg) scale(1.2); }
+        .hero.attack { transform: translateX(60px) rotate(15deg) scale(1.2); }
         .hero.happy { transform: translateY(-15px) scale(1.1); filter: drop-shadow(0 0 15px #f6e58d); }
 
         @keyframes explodeAnim { 
@@ -228,8 +229,11 @@
 <div id="app">
     <!-- 상단 바 -->
     <div id="top-bar">
+        <!-- 💡 상단 아이템 획득 타이머 배치 -->
+        <div class="stat-badge" id="top-item-timer" style="color:#e67e22; flex-shrink: 0; font-size:12px; border-color:#f39c12; width:75px;">📦 01:00</div>
+        
         <div class="top-stats">
-            <div class="stat-badge merge">🔄 머지: <span id="val-merge">0</span></div>
+            <div class="stat-badge merge">🔄 <span id="val-merge">0</span></div>
             <div class="stat-badge gold">🪙 <span id="val-gold">1,000</span></div>
             <div class="stat-badge" id="shield-badge" style="gap:2px;"></div>
         </div>
@@ -296,8 +300,7 @@
                 <div class="panel">
                     <div class="panel-title">로비 캐릭터 뽑기</div>
                     <button class="action-btn-main" id="btn-buy-char" onclick="buyCharacter()">
-                        🎁 캐릭터 뽑기<br>
-                        <span style="font-size:13px; color:#27ae60;" id="char-cost-label">요구: 10 🔄 + 10 🪙</span>
+                        <!-- 동적으로 텍스트 삽입됨 -->
                     </button>
                     <div class="inventory-grid" id="char-inventory-grid"></div>
                 </div>
@@ -313,9 +316,8 @@
                         <span>보급 상자</span>
                         <span style="font-size:14px; color:#e67e22;" id="item-timer-label">⏳ 01:00</span>
                     </div>
-                    <button class="action-btn-main" id="btn-claim-item" onclick="claimItem()" disabled>
-                        📦 아이템 획득!<br>
-                        <span style="font-size:13px; color:#27ae60;" id="item-cost-label">요구: 10 🔄</span>
+                    <button class="action-btn-main" id="btn-claim-item" onclick="claimItem()">
+                        <!-- 동적으로 텍스트 삽입됨 -->
                     </button>
                 </div>
                 
@@ -395,6 +397,13 @@
     }
     updateTopUI(); updateShieldUI();
 
+    // ================= [ 전투 애니메이션 이미지 사전 로딩 ] =================
+    function preloadImages() {
+        const attackImg = new Image(); attackImg.src = 'images/character/battle/01_Attack.png';
+        const victoryImg = new Image(); victoryImg.src = 'images/character/battle/01_victory.png';
+    }
+    preloadImages();
+
     // ================= [ 데이터베이스 및 경제 시스템 ] =================
     let multiplier = 1;
     const multList = [1, 2, 5, 10];
@@ -403,7 +412,7 @@
     // 캐릭터 뽑기 시스템 (로비 캐릭터 6종 기준)
     let charCostMerge = 10;
     let charCostGold = 10;
-    let charInventory = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 }; // id: count
+    let charInventory = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 }; 
     const LOBBY_CHARS = [
         'images/character/lobby/animal/01.png', 'images/character/lobby/animal/02.png',
         'images/character/lobby/animal/03.png', 'images/character/lobby/animal/04.png',
@@ -419,11 +428,11 @@
         C:  ['🪴', '🧸', '📚', '☕', '📺', '🎸', '🕹️', '🐈', '🖼️', '🕰️', '🛋️', '🛏️', '🌵', '📻', '🛹']
     };
     let itemInventory = {};
-    // 인벤토리 초기화
     Object.keys(ITEMS_DB).forEach(tier => { ITEMS_DB[tier].forEach(item => itemInventory[item] = { tier: tier, count: 0 }); });
     
     let itemCostMerge = 10;
-    let itemTimer = 60; // 1분 = 60초
+    let itemTimer = 60; // 1분
+    let isItemReady = false; // 상단 알림 제어용 플래그
 
     // ================= [ 타이머 루프 (글로벌 매니저) ] =================
     setInterval(() => {
@@ -432,10 +441,25 @@
         // 1. 아이템 획득 타이머
         if (itemTimer > 0) {
             itemTimer--;
+            isItemReady = false;
+        }
+
+        // 상단 타이머 UI 업데이트
+        const topTimerEl = document.getElementById('top-item-timer');
+        if (itemTimer <= 0 && mergeCount >= itemCostMerge) {
+            if (!isItemReady) {
+                isItemReady = true;
+                showFloatingText("📦 보급 상자 준비 완료!", 210, 100, "#1dd1a1");
+            }
+            topTimerEl.innerHTML = '<span style="color:#27ae60;">📦 완료!</span>';
+            topTimerEl.style.borderColor = '#27ae60';
+        } else {
             let mins = Math.floor(itemTimer / 60).toString().padStart(2, '0');
             let secs = (itemTimer % 60).toString().padStart(2, '0');
-            document.getElementById('item-timer-label').innerText = `⏳ ${mins}:${secs}`;
+            topTimerEl.innerHTML = `📦 ${mins}:${secs}`;
+            topTimerEl.style.borderColor = '#f39c12';
         }
+        
         updateItemUI();
 
         // 2. 간식서리 오토 모드
@@ -451,7 +475,7 @@
         if (snackAutoMode && !lockBoard && isMinigameActive) {
             snackTickTimer--;
             if (snackTickTimer <= 0) {
-                snackTickTimer = 1; // 0.5초(인터벌이 1초라 여기서 맞추면 좀 느림. 아래에서 100ms로 제어)
+                snackTickTimer = 1; 
             }
         }
     }, 1000);
@@ -459,6 +483,10 @@
     // 더 정밀한 오토 루프 (0.1초 단위)
     let autoDropTick = 0;
     let snackFlipTick = 0;
+    let snackWaitTimer = 3;
+    let snackAutoMode = false;
+    let snackTickTimer = 1;
+
     setInterval(() => {
         if (globalPause) return;
 
@@ -487,7 +515,15 @@
 
     // ================= [ 캐릭터 & 아이템 UI 로직 ] =================
     function updateCharUI() {
-        document.getElementById('char-cost-label').innerText = `요구: ${charCostMerge.toLocaleString()} 🔄 + ${charCostGold.toLocaleString()} 🪙`;
+        const btn = document.getElementById('btn-buy-char');
+        if (mergeCount >= charCostMerge && gold >= charCostGold) {
+            btn.disabled = false;
+            btn.innerHTML = `🎁 캐릭터 뽑기<br><span style="font-size:13px; color:#27ae60;">요구: ${charCostMerge.toLocaleString()} 🔄 + ${charCostGold.toLocaleString()} 🪙</span>`;
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = `🎁 캐릭터 뽑기<br><span style="font-size:13px; color:#999;">요구: ${charCostMerge.toLocaleString()} 🔄 + ${charCostGold.toLocaleString()} 🪙</span>`;
+        }
+        
         const grid = document.getElementById('char-inventory-grid');
         grid.innerHTML = '';
         for (let i = 1; i <= 6; i++) {
@@ -507,13 +543,10 @@
             showFloatingText("머지 횟수나 골드가 부족합니다!", 210, 400, "#ff7675");
             return;
         }
-        // 구매 처리
         gold -= charCostGold;
-        // 요구사항은 10배씩 증가
         charCostMerge *= 10;
         charCostGold *= 10;
         
-        // 1~6 랜덤 뽑기
         const picked = Math.floor(Math.random() * 6) + 1;
         charInventory[picked]++;
         
@@ -524,22 +557,29 @@
 
     function updateItemUI() {
         const btn = document.getElementById('btn-claim-item');
-        const costLabel = document.getElementById('item-cost-label');
-        
-        costLabel.innerText = `요구: ${itemCostMerge.toLocaleString()} 🔄`;
-        
+        const timerLabel = document.getElementById('item-timer-label');
+
         if (itemTimer <= 0 && mergeCount >= itemCostMerge) {
             btn.disabled = false;
-            btn.innerHTML = `📦 아이템 획득!<br><span style="font-size:13px; color:#fff;">클릭하여 열기</span>`;
+            btn.innerHTML = `📦 아이템 획득!<br><span style="font-size:13px; color:#27ae60;">클릭하여 열기 (요구: ${itemCostMerge.toLocaleString()} 🔄)</span>`;
+            timerLabel.innerText = '✅ 준비 완료';
         } else {
             btn.disabled = true;
-            btn.innerHTML = `📦 아이템 대기중<br><span style="font-size:13px; color:#999;">${itemCostMerge.toLocaleString()} 🔄 필요</span>`;
+            let timeStr = "";
+            if (itemTimer > 0) {
+                let mins = Math.floor(itemTimer / 60).toString().padStart(2, '0');
+                let secs = (itemTimer % 60).toString().padStart(2, '0');
+                timerLabel.innerText = `⏳ ${mins}:${secs}`;
+                timeStr = `(⏳ ${mins}:${secs})`;
+            } else {
+                timerLabel.innerText = `⏳ 시간 완료 (머지 부족)`;
+            }
+            btn.innerHTML = `📦 아이템 대기중<br><span style="font-size:13px; color:#999;">요구: ${itemCostMerge.toLocaleString()} 🔄 ${timeStr}</span>`;
         }
 
         const grid = document.getElementById('item-inventory-grid');
         grid.innerHTML = '';
         
-        // C -> SS 순으로 정렬해서 표시
         const renderOrder = ['C', 'B', 'A', 'S', 'SS'];
         renderOrder.forEach(tier => {
             ITEMS_DB[tier].forEach(item => {
@@ -559,11 +599,10 @@
     window.claimItem = function() {
         if (itemTimer > 0 || mergeCount < itemCostMerge) return;
         
-        // 시간 초기화 및 비용 증가 (5배)
         itemCostMerge *= 5;
-        itemTimer = 60; // 다시 1분 대기
+        itemTimer = 60; // 1분 초기화
+        isItemReady = false;
         
-        // 티어 확률 (가챠)
         const rand = Math.random() * 100;
         let pickedTier = 'C';
         if (rand < 0.1) pickedTier = 'SS';
@@ -597,7 +636,6 @@
     }
 
     window.craftItem = function() {
-        // C 아이템 총합 확인
         let totalC = 0;
         ITEMS_DB['C'].forEach(item => totalC += itemInventory[item].count);
         
@@ -606,7 +644,6 @@
             return;
         }
         
-        // C 아이템 10개 차감
         let toDeduct = 10;
         for (let i = 0; i < ITEMS_DB['C'].length; i++) {
             const item = ITEMS_DB['C'][i];
@@ -617,7 +654,6 @@
             if (toDeduct === 0) break;
         }
         
-        // B 아이템 1개 랜덤 지급
         const pool = ITEMS_DB['B'];
         const pickedItem = pool[Math.floor(Math.random() * pool.length)];
         itemInventory[pickedItem].count++;
@@ -636,7 +672,6 @@
         setTimeout(() => { document.getElementById('event-overlay').style.display = 'none'; resultEl.style.display = 'none'; setGlobalPause(false); }, 2000);
     }
 
-    // 초기 UI 세팅
     updateCharUI(); updateItemUI();
 
     // ================= [ 네비게이션 및 메뉴 ] =================
@@ -652,21 +687,9 @@
         if (menuId === 'myroom') updateItemUI();
     }
 
-    // ================= [ 로비 스와이프 로직 ] =================
-    let currentLobbyCharIdx = 0;
-    const lobbyCharImg = document.getElementById('lobby-char-img');
-    function updateLobbyChar() {
-        lobbyCharImg.style.opacity = 0;
-        setTimeout(() => { lobbyCharImg.src = LOBBY_CHARS[currentLobbyCharIdx]; lobbyCharImg.style.opacity = 1; }, 150);
-    }
-    window.prevLobbyChar = function() { currentLobbyCharIdx = (currentLobbyCharIdx - 1 + LOBBY_CHARS.length) % LOBBY_CHARS.length; updateLobbyChar(); }
-    window.nextLobbyChar = function() { currentLobbyCharIdx = (currentLobbyCharIdx + 1) % LOBBY_CHARS.length; updateLobbyChar(); }
-
     // ================= [ 💡 간식서리 미니게임 스크립트 ] =================
     let lockBoard = false; let foundCounts = {};
     let isMinigameActive = false;
-    let snackWaitTimer = 3;
-    let snackAutoMode = false;
     
     function updateRewardUI(emoji) {
         const count = foundCounts[emoji]; const item = document.getElementById(`reward-${emoji}`); const countText = document.getElementById(`count-${emoji}`);
@@ -677,7 +700,7 @@
     }
 
     function triggerSnackHeistEvent() {
-        setGlobalPause(true); // 배경 멈춤
+        setGlobalPause(true); 
         isMinigameActive = true; snackAutoMode = false; snackWaitTimer = 3; lockBoard = false;
         foundCounts = { '🍰': 0, '🍕': 0, '🍿': 0 };
         document.getElementById('auto-heist-msg').innerText = "3초 후 자동 진행...";
@@ -694,7 +717,7 @@
         cardEmojis.sort(() => Math.random() - 0.5);
         cardEmojis.forEach((emoji) => {
             const card = document.createElement('div'); card.className = 'memory-card'; card.dataset.emoji = emoji; card.innerText = '❓';
-            card.onclick = () => { snackAutoMode = false; snackWaitTimer = 3; flipCard(card); }; // 터치 시 오토 취소 및 연장
+            card.onclick = () => { snackAutoMode = false; snackWaitTimer = 3; flipCard(card); }; 
             grid.appendChild(card);
         });
     }
@@ -722,7 +745,7 @@
             setTimeout(() => {
                 gold += finalReward; updateTopUI(); document.getElementById('minigame-overlay').style.display = 'none';
                 resultEl.style.display = 'none'; isMinigameActive = false; lockBoard = false;
-                setGlobalPause(false); // 배경 재개
+                setGlobalPause(false); 
             }, 2500);
         }
     }
@@ -773,6 +796,7 @@
 
     const heroEl = document.getElementById('hero');
     const enemyEl = document.getElementById('enemy');
+    let isBattling = false;
     let isFeverMode = false;
 
     function triggerBattle() {
@@ -784,9 +808,12 @@
         enemyEl.className = 'character enemy slide-in';
 
         setTimeout(() => {
-            heroEl.src = 'images/character/battle/01_Attack.png'; heroEl.classList.add('attack');
+            heroEl.src = 'images/character/battle/01_Attack.png'; 
+            heroEl.classList.add('attack');
+            
             setTimeout(() => {
-                heroEl.src = 'images/character/battle/01_Idle.png'; heroEl.classList.remove('attack'); 
+                heroEl.src = 'images/character/battle/01_Idle.png'; 
+                heroEl.classList.remove('attack'); 
                 enemyEl.className = 'character enemy explode';
 
                 const rand = Math.floor(Math.random() * 12);
@@ -812,16 +839,20 @@
                     const amount = 100 * multiplier; gold += amount; rewardText = `+${amount} 🪙`; rewardColor = "#f6e58d"; 
                 } else if (rand === 8 || rand === 9) { 
                     const amount = 20; gold -= amount; rewardText = `-${amount} 🪙`; rewardColor = "#ff7675"; 
-                } else { 
-                    // 에너지가 사라졌으므로 골드로 대체 또는 꽝
-                    rewardText = `빗나감!`; rewardColor = "#ccc"; 
+                } else if (rand === 10 || rand === 11) { 
+                    // 💡 에너지 대신 머지 횟수 펌핑 보상으로 변경!
+                    const amount = 10 * multiplier; 
+                    mergeCount += amount; 
+                    rewardText = `+${amount} 🔄`; rewardColor = "#9b59b6"; 
                 }
                 
                 updateTopUI();
                 if (rewardText !== null) { showFloatingText(rewardText, rect.left - 20, rect.top + 30, rewardColor); }
                 setTimeout(() => { enemyEl.className = 'character enemy'; if (rewardText !== null) isBattling = false; }, 400);
+                
+                // 💡 안전장치: 보상이 null(정지 이벤트)일 때만 2초 뒤 해제
                 if (rewardText === null) { setTimeout(() => { isBattling = false; }, 2000); }
-            }, 150); 
+            }, 300); 
         }, 200); 
     }
 
@@ -842,17 +873,15 @@
     let isCrisis = false;
     let isWarning = false;
     
-    // 토네이도 스킬 변수
     let tornadoTicks = 0;
-    let dangerMuteTimer = 0; // 위험선 감지 무시 타이머
+    let dangerMuteTimer = 0; 
 
     window.onload = () => {
         const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Composite = Matter.Composite, Events = Matter.Events;
         
         const physicsArea = document.getElementById('physics-area');
-        // 고정 크기이므로 미리 크기를 명확히 지정해버려도 됨. (app=420x800 기준)
-        const width = 386; // 420px * 92% (left 4 right 4)
-        const height = 413; // 460px (game-section height appx) * 88%
+        const width = 386; 
+        const height = 413; 
 
         const engine = Engine.create({ enableSleeping: false }); const world = engine.world;
         window.gameEngine = engine;
@@ -871,7 +900,6 @@
         
         Composite.add(world, [floor, leftWall, rightWall]);
 
-        // 토네이도 (Tornado) 물리 효과 부여
         Events.on(engine, 'beforeUpdate', () => {
             if (globalPause) return;
             
@@ -883,7 +911,6 @@
                 const cx = width / 2;
                 allBalls.forEach(b => {
                     const dx = cx - b.position.x;
-                    // X축으로 끌어들이고 Y축으로 위로 띄움
                     Matter.Body.applyForce(b, b.position, { 
                         x: dx * 0.00003 + (Math.random() - 0.5) * 0.0005 * b.mass, 
                         y: -0.002 * b.mass 
@@ -912,11 +939,12 @@
             } else if (itemType === 'shake') {
                 allBalls.forEach(b => { const force = 0.12 * b.mass; Matter.Body.applyForce(b, b.position, { x: (Math.random() - 0.5) * force, y: -force * 1.8 }); });
                 showFloatingText(`쉐이크 🌪️`, 210, 400);
+                dangerMuteTimer = 180; // 💡 쉐이크 사용 시에도 3초간 위험선 감지 무적 부여!
             } else if (itemType === 'tornado') {
                 if (tornadoTicks > 0) return;
                 showFloatingText(`토네이도 발동! 🌀`, 210, 400, "#78e08f");
-                tornadoTicks = 180; // 60fps * 3s
-                dangerMuteTimer = 300; // 5s 동안 무적 (올라갔다 떨어지는 시간 고려)
+                tornadoTicks = 180; // 3초
+                dangerMuteTimer = 300; // 5초 무적
                 
                 const btn = document.getElementById('btn-tornado');
                 btn.classList.add('active');
@@ -980,27 +1008,30 @@
                     bodyA.isMerging = true; bodyB.isMerging = true; const nextLevel = bodyA.level + 1;
                     
                     setTimeout(() => {
-                        const midX = (bodyA.position.x + bodyB.position.x) / 2; const midY = (bodyA.position.y + bodyB.position.y) / 2;
-                        Composite.remove(world, [bodyA, bodyB]);
-                        const nextLevelData = LEVELS[nextLevel];
-                        const newBody = Bodies.circle(midX, midY, nextLevelData.radius, {
-                            restitution: 0.3, render: { sprite: { texture: nextLevelData.img, xScale: nextLevelData.scale, yScale: nextLevelData.scale } }
-                        });
-                        newBody.level = nextLevel; newBody.isMerging = false; newBody.spawnTime = Date.now(); 
-                        
-                        Matter.Body.setVelocity(newBody, { x: 0, y: -2.5 }); Composite.add(world, newBody); 
-                        createMergeEffect(midX, midY, nextLevel); 
-                        
-                        mergeCount++; // 🔄 머지 횟수 증가
-                        updateTopUI();
-                        updateItemUI(); // 아이템 버튼 활성화 여부 업데이트
-                        triggerBattle(); // 무작위 전투/보상
+                        try {
+                            const midX = (bodyA.position.x + bodyB.position.x) / 2; const midY = (bodyA.position.y + bodyB.position.y) / 2;
+                            Composite.remove(world, [bodyA, bodyB]);
+                            const nextLevelData = LEVELS[nextLevel];
+                            const newBody = Bodies.circle(midX, midY, nextLevelData.radius, {
+                                restitution: 0.3, render: { sprite: { texture: nextLevelData.img, xScale: nextLevelData.scale, yScale: nextLevelData.scale } }
+                            });
+                            newBody.level = nextLevel; newBody.isMerging = false; newBody.spawnTime = Date.now(); 
+                            
+                            Matter.Body.setVelocity(newBody, { x: 0, y: -2.5 }); Composite.add(world, newBody); 
+                            createMergeEffect(midX, midY, nextLevel); 
+                            
+                            mergeCount++; 
+                            updateTopUI();
+                            updateItemUI(); 
+                            triggerBattle(); 
+                        } catch(e) {
+                            console.error("Collision error handling resolved.", e);
+                        }
                     }, 10);
                 }
             }
         });
 
-        // 데드라인 감지 (토네이도 발동 중 무시)
         let warningTimeRemaining = 5.0;
         let warningInterval = null;
         const DEADLINE_Y = 45;
