@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "note": "파일명은 4자리 규칙을 사용합니다. 실제 보유 아트명과 다르면 path만 수정하세요.",
+  "items": [
+    {
+      "id": "bead_animal_0001",
+      "name": "Animal Bead 0001",
+      "tier": "C",
+      "path": "assets/art/beads/bead_animal_0001.png",
+      "defaultOwned": true
+    },
+    {
+      "id": "bead_animal_0002",
+      "name": "Animal Bead 0002",
+      "tier": "C",
+      "path": "assets/art/beads/bead_animal_0002.png"
+    },
+    {
+      "id": "bead_animal_0003",
+      "name": "Animal Bead 0003",
+      "tier": "C",
+      "path": "assets/art/beads/bead_animal_0003.png"
+    },
+    {
+      "id": "bead_animal_0004",
+      "name": "Animal Bead 0004",
+      "tier": "C",
+      "path": "assets/art/beads/bead_animal_0004.png"
+    },
+    {
+      "id": "bead_dot_0001",
+      "name": "Dot Bead 0001",
+      "tier": "C",
+      "path": "assets/art/beads/bead_dot_0001.png"
+    },
+    {
+      "id": "bead_dot_0002",
+      "name": "Dot Bead 0002",
+      "tier": "C",
+      "path": "assets/art/beads/bead_dot_0002.png"
+    },
+    {
+      "id": "bead_animal_0005",
+      "name": "Animal Bead 0005",
+      "tier": "B",
+      "path": "assets/art/beads/bead_animal_0005.png"
+    },
+    {
+      "id": "bead_animal_0006",
+      "name": "Animal Bead 0006",
+      "tier": "B",
+      "path": "assets/art/beads/bead_animal_0006.png"
+    },
+    {
+      "id": "bead_dot_0003",
+      "name": "Dot Bead 0003",
+      "tier": "B",
+      "path": "assets/art/beads/bead_dot_0003.png"
+    },
+    {
+      "id": "bead_dot_0004",
+      "name": "Dot Bead 0004",
+      "tier": "B",
+      "path": "assets/art/beads/bead_dot_0004.png"
+    },
+    {
+      "id": "bead_dot_0005",
+      "name": "Dot Bead 0005",
+      "tier": "B",
+      "path": "assets/art/beads/bead_dot_0005.png"
+    },
+    {
+      "id": "bead_animal_0007",
+      "name": "Animal Bead 0007",
+      "tier": "A",
+      "path": "assets/art/beads/bead_animal_0007.png"
+    },
+    {
+      "id": "bead_animal_0008",
+      "name": "Animal Bead 0008",
+      "tier": "A",
+      "path": "assets/art/beads/bead_animal_0008.png"
+    },
+    {
+      "id": "bead_dot_0006",
+      "name": "Dot Bead 0006",
+      "tier": "A",
+      "path": "assets/art/beads/bead_dot_0006.png"
+    },
+    {
+      "id": "bead_dot_0007",
+      "name": "Dot Bead 0007",
+      "tier": "A",
+      "path": "assets/art/beads/bead_dot_0007.png"
+    },
+    {
+      "id": "bead_dot_0008",
+      "name": "Dot Bead 0008",
+      "tier": "A",
+      "path": "assets/art/beads/bead_dot_0008.png"
+    },
+    {
+      "id": "bead_animal_0009",
+      "name": "Animal Bead 0009",
+      "tier": "S",
+      "path": "assets/art/beads/bead_animal_0009.png"
+    },
+    {
+      "id": "bead_animal_0010",
+      "name": "Animal Bead 0010",
+      "tier": "S",
+      "path": "assets/art/beads/bead_animal_0010.png"
+    },
+    {
+      "id": "bead_dot_0009",
+      "name": "Dot Bead 0009",
+      "tier": "S",
+      "path": "assets/art/beads/bead_dot_0009.png"
+    },
+    {
+      "id": "bead_dot_0010",
+      "name": "Dot Bead 0010",
+      "tier": "S",
+      "path": "assets/art/beads/bead_dot_0010.png"
+    },
+    {
+      "id": "bead_animal_0011",
+      "name": "Animal Bead 0011",
+      "tier": "SS",
+      "path": "assets/art/beads/bead_animal_0011.png"
+    },
+    {
+      "id": "bead_animal_0012",
+      "name": "Animal Bead 0012",
+      "tier": "SS",
+      "path": "assets/art/beads/bead_animal_0012.png"
+    }
+  ]
+}

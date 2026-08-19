@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "note": "전투 캐릭터는 Idle 이미지만 사용합니다. 새 전투 캐릭터를 추가할 때 items에 한 줄씩 추가하세요.",
+  "items": [
+    {
+      "id": "battle_char_0001",
+      "index": 0,
+      "name": "Battle Character 0001",
+      "tier": "C",
+      "idle": "assets/art/battle_characters/battle_char_0001_Idle.png",
+      "defaultOwned": true,
+      "gachaEnabled": false,
+      "linkedCharacter": "char_0001"
+    }
+  ]
+}

@@ -1,0 +1,786 @@
+{
+  "version": 1,
+  "note": "lobby/battle/merge/border를 하나의 JSON에서 kind로 구분합니다. 등급은 JSON에서만 관리합니다.",
+  "items": [
+    {
+      "id": "bg_lobby_0001",
+      "kind": "lobby",
+      "index": 1,
+      "name": "Lobby Background 0001",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0001.png",
+      "defaultOwned": true,
+      "gachaEnabled": false
+    },
+    {
+      "id": "bg_lobby_0002",
+      "kind": "lobby",
+      "index": 2,
+      "name": "Lobby Background 0002",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0002.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0003",
+      "kind": "lobby",
+      "index": 3,
+      "name": "Lobby Background 0003",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0003.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0004",
+      "kind": "lobby",
+      "index": 4,
+      "name": "Lobby Background 0004",
+      "tier": "S",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0004.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0005",
+      "kind": "lobby",
+      "index": 5,
+      "name": "Lobby Background 0005",
+      "tier": "SS",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0005.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0006",
+      "kind": "lobby",
+      "index": 6,
+      "name": "Lobby Background 0006",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0006.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0007",
+      "kind": "lobby",
+      "index": 7,
+      "name": "Lobby Background 0007",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0007.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0008",
+      "kind": "lobby",
+      "index": 8,
+      "name": "Lobby Background 0008",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0008.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0009",
+      "kind": "lobby",
+      "index": 9,
+      "name": "Lobby Background 0009",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0009.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0010",
+      "kind": "lobby",
+      "index": 10,
+      "name": "Lobby Background 0010",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0010.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0011",
+      "kind": "lobby",
+      "index": 11,
+      "name": "Lobby Background 0011",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0011.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0012",
+      "kind": "lobby",
+      "index": 12,
+      "name": "Lobby Background 0012",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0012.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0013",
+      "kind": "lobby",
+      "index": 13,
+      "name": "Lobby Background 0013",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0013.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0014",
+      "kind": "lobby",
+      "index": 14,
+      "name": "Lobby Background 0014",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0014.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0015",
+      "kind": "lobby",
+      "index": 15,
+      "name": "Lobby Background 0015",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0015.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0016",
+      "kind": "lobby",
+      "index": 16,
+      "name": "Lobby Background 0016",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0016.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0017",
+      "kind": "lobby",
+      "index": 17,
+      "name": "Lobby Background 0017",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0017.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0018",
+      "kind": "lobby",
+      "index": 18,
+      "name": "Lobby Background 0018",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0018.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0019",
+      "kind": "lobby",
+      "index": 19,
+      "name": "Lobby Background 0019",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0019.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0020",
+      "kind": "lobby",
+      "index": 20,
+      "name": "Lobby Background 0020",
+      "tier": "S",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0020.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0021",
+      "kind": "lobby",
+      "index": 21,
+      "name": "Lobby Background 0021",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0021.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0022",
+      "kind": "lobby",
+      "index": 22,
+      "name": "Lobby Background 0022",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0022.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0023",
+      "kind": "lobby",
+      "index": 23,
+      "name": "Lobby Background 0023",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0023.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0024",
+      "kind": "lobby",
+      "index": 24,
+      "name": "Lobby Background 0024",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0024.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0025",
+      "kind": "lobby",
+      "index": 25,
+      "name": "Lobby Background 0025",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0025.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0026",
+      "kind": "lobby",
+      "index": 26,
+      "name": "Lobby Background 0026",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0026.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0027",
+      "kind": "lobby",
+      "index": 27,
+      "name": "Lobby Background 0027",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0027.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0028",
+      "kind": "lobby",
+      "index": 28,
+      "name": "Lobby Background 0028",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0028.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0029",
+      "kind": "lobby",
+      "index": 29,
+      "name": "Lobby Background 0029",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0029.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0030",
+      "kind": "lobby",
+      "index": 30,
+      "name": "Lobby Background 0030",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0030.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0031",
+      "kind": "lobby",
+      "index": 31,
+      "name": "Lobby Background 0031",
+      "tier": "S",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0031.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0032",
+      "kind": "lobby",
+      "index": 32,
+      "name": "Lobby Background 0032",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0032.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0033",
+      "kind": "lobby",
+      "index": 33,
+      "name": "Lobby Background 0033",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0033.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0034",
+      "kind": "lobby",
+      "index": 34,
+      "name": "Lobby Background 0034",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0034.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0035",
+      "kind": "lobby",
+      "index": 35,
+      "name": "Lobby Background 0035",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0035.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0036",
+      "kind": "lobby",
+      "index": 36,
+      "name": "Lobby Background 0036",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0036.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0037",
+      "kind": "lobby",
+      "index": 37,
+      "name": "Lobby Background 0037",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0037.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0038",
+      "kind": "lobby",
+      "index": 38,
+      "name": "Lobby Background 0038",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0038.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0039",
+      "kind": "lobby",
+      "index": 39,
+      "name": "Lobby Background 0039",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0039.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0040",
+      "kind": "lobby",
+      "index": 40,
+      "name": "Lobby Background 0040",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0040.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0041",
+      "kind": "lobby",
+      "index": 41,
+      "name": "Lobby Background 0041",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0041.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0042",
+      "kind": "lobby",
+      "index": 42,
+      "name": "Lobby Background 0042",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0042.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0043",
+      "kind": "lobby",
+      "index": 43,
+      "name": "Lobby Background 0043",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0043.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0044",
+      "kind": "lobby",
+      "index": 44,
+      "name": "Lobby Background 0044",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0044.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0045",
+      "kind": "lobby",
+      "index": 45,
+      "name": "Lobby Background 0045",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0045.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0046",
+      "kind": "lobby",
+      "index": 46,
+      "name": "Lobby Background 0046",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0046.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0047",
+      "kind": "lobby",
+      "index": 47,
+      "name": "Lobby Background 0047",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0047.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0048",
+      "kind": "lobby",
+      "index": 48,
+      "name": "Lobby Background 0048",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0048.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0049",
+      "kind": "lobby",
+      "index": 49,
+      "name": "Lobby Background 0049",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0049.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0050",
+      "kind": "lobby",
+      "index": 50,
+      "name": "Lobby Background 0050",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0050.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0051",
+      "kind": "lobby",
+      "index": 51,
+      "name": "Lobby Background 0051",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0051.jpg",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0052",
+      "kind": "lobby",
+      "index": 52,
+      "name": "Lobby Background 0052",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0052.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0053",
+      "kind": "lobby",
+      "index": 53,
+      "name": "Lobby Background 0053",
+      "tier": "A",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0053.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0054",
+      "kind": "lobby",
+      "index": 54,
+      "name": "Lobby Background 0054",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0054.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0055",
+      "kind": "lobby",
+      "index": 55,
+      "name": "Lobby Background 0055",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0055.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0056",
+      "kind": "lobby",
+      "index": 56,
+      "name": "Lobby Background 0056",
+      "tier": "SS",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0056.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0057",
+      "kind": "lobby",
+      "index": 57,
+      "name": "Lobby Background 0057",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0057.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0058",
+      "kind": "lobby",
+      "index": 58,
+      "name": "Lobby Background 0058",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0058.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0059",
+      "kind": "lobby",
+      "index": 59,
+      "name": "Lobby Background 0059",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0059.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0060",
+      "kind": "lobby",
+      "index": 60,
+      "name": "Lobby Background 0060",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0060.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0061",
+      "kind": "lobby",
+      "index": 61,
+      "name": "Lobby Background 0061",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0061.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0062",
+      "kind": "lobby",
+      "index": 62,
+      "name": "Lobby Background 0062",
+      "tier": "C",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0062.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_lobby_0063",
+      "kind": "lobby",
+      "index": 63,
+      "name": "Lobby Background 0063",
+      "tier": "B",
+      "path": "assets/art/backgrounds/lobby/bg_lobby_0063.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_battle_0001",
+      "kind": "battle",
+      "index": 1,
+      "name": "Battle 0001",
+      "tier": "B",
+      "path": "assets/art/backgrounds/battle/bg_battle_0001.png",
+      "defaultOwned": true,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_battle_0002",
+      "kind": "battle",
+      "index": 2,
+      "name": "Battle 0002",
+      "tier": "B",
+      "path": "assets/art/backgrounds/battle/bg_battle_0002.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_battle_0003",
+      "kind": "battle",
+      "index": 3,
+      "name": "Battle 0003",
+      "tier": "A",
+      "path": "assets/art/backgrounds/battle/bg_battle_0003.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_battle_0004",
+      "kind": "battle",
+      "index": 4,
+      "name": "Battle 0004",
+      "tier": "S",
+      "path": "assets/art/backgrounds/battle/bg_battle_0004.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_battle_0005",
+      "kind": "battle",
+      "index": 5,
+      "name": "Battle 0005",
+      "tier": "SS",
+      "path": "assets/art/backgrounds/battle/bg_battle_0005.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_merge_0001",
+      "kind": "merge",
+      "index": 1,
+      "name": "Merge 0001",
+      "tier": "B",
+      "path": "assets/art/backgrounds/merge/bg_merge_0001.png",
+      "defaultOwned": true,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_merge_0002",
+      "kind": "merge",
+      "index": 2,
+      "name": "Merge 0002",
+      "tier": "B",
+      "path": "assets/art/backgrounds/merge/bg_merge_0002.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_merge_0003",
+      "kind": "merge",
+      "index": 3,
+      "name": "Merge 0003",
+      "tier": "A",
+      "path": "assets/art/backgrounds/merge/bg_merge_0003.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_merge_0004",
+      "kind": "merge",
+      "index": 4,
+      "name": "Merge 0004",
+      "tier": "S",
+      "path": "assets/art/backgrounds/merge/bg_merge_0004.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "bg_merge_0005",
+      "kind": "merge",
+      "index": 5,
+      "name": "Merge 0005",
+      "tier": "SS",
+      "path": "assets/art/backgrounds/merge/bg_merge_0005.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "border_merge_0001",
+      "kind": "border",
+      "index": 1,
+      "name": "Border 0001",
+      "tier": "B",
+      "path": "assets/art/backgrounds/border/border_merge_0001.png",
+      "defaultOwned": true,
+      "gachaEnabled": true
+    },
+    {
+      "id": "border_merge_0002",
+      "kind": "border",
+      "index": 2,
+      "name": "Border 0002",
+      "tier": "B",
+      "path": "assets/art/backgrounds/border/border_merge_0002.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "border_merge_0003",
+      "kind": "border",
+      "index": 3,
+      "name": "Border 0003",
+      "tier": "A",
+      "path": "assets/art/backgrounds/border/border_merge_0003.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "border_merge_0004",
+      "kind": "border",
+      "index": 4,
+      "name": "Border 0004",
+      "tier": "S",
+      "path": "assets/art/backgrounds/border/border_merge_0004.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    },
+    {
+      "id": "border_merge_0005",
+      "kind": "border",
+      "index": 5,
+      "name": "Border 0005",
+      "tier": "SS",
+      "path": "assets/art/backgrounds/border/border_merge_0005.png",
+      "defaultOwned": false,
+      "gachaEnabled": true
+    }
+  ]
+}
