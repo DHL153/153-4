@@ -106,7 +106,7 @@
         .cost-label { font-size: 11px; color: #d81b60; margin-top: 2px; font-weight: 900;}
         
         .btn-mult { background: #d1c4e9; box-shadow: 0 4px 0 #9575cd; justify-content: center; }
-        .btn-hammer { background: #82ccdd; box-shadow: 0 4px 0 #60a3bc; } 
+        .btn-organize { background: #82ccdd; box-shadow: 0 4px 0 #60a3bc; } 
         .btn-shake { background: #f6e58d; box-shadow: 0 4px 0 #f4d03f; } 
         .btn-tornado { background: #b8e994; box-shadow: 0 4px 0 #78e08f; } 
         .btn-auto { flex: 1.2; background: #fff; box-shadow: 0 4px 0 #b2bec3; border: 2px solid #d2bce3; transform: scale(1.05); margin: 0 4px;}
@@ -148,10 +148,182 @@
         #view-character { flex-direction: column; height: 100%; background: #fff; overflow: hidden;}
         .char-custom-layout { display: flex; flex-direction: row; height: 100%; width: 100%; }
         
-        #char-preview-zone { flex: 1; min-width:0; position: relative; background: #e8dff5; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        #char-preview-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: all 0.3s;}
-        #char-preview-body { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; padding: 20px; transition: all 0.3s;}
+        #char-preview-zone {
+            flex:1; min-width:0; position:relative; background:#e8dff5;
+            overflow:hidden; display:flex; justify-content:center; align-items:center;
+            --char-x:50%; --char-y:54%;
+            --char-preview-bg-image:none;
+            --bg-focus-x:50%;
+            --bg-focus-y:50%;
+            --char-user-scale:1; --char-user-rotate:0deg; --char-user-flip:1; --bg-user-scale:1;
+        }
+
+        /* 카테고리 열림:
+           배경 선택/확인이 목적이므로 원본 전체를 볼 수 있게 contain.
+           남는 영역은 동일 배경의 blur-cover로 자연스럽게 채운다. */
+        #char-preview-bg {
+            position:absolute; inset:0; width:100%; height:100%;
+            object-fit:contain;
+            object-position:var(--bg-focus-x) var(--bg-focus-y);
+            z-index:1;
+            transition:opacity .22s ease, object-position .25s ease;
+            filter:none; background:transparent; user-select:none; -webkit-user-drag:none;
+        }
+        #char-preview-zone::before {
+            content:""; position:absolute; inset:-18px; z-index:0;
+            background-image:var(--char-preview-bg-image, none);
+            background-size:cover;
+            background-position:var(--bg-focus-x) var(--bg-focus-y);
+            background-repeat:no-repeat;
+            filter:blur(14px) brightness(.78) saturate(.92);
+            transform:scale(1.08);
+            opacity:.52; pointer-events:none;
+            transition:opacity .25s ease;
+        }
+        #char-preview-zone::after {
+            content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+            box-shadow:inset 0 0 28px rgba(0,0,0,.05);
+        }
+
+        /* 카테고리 닫힘 = 감상/몰입 모드.
+           배경을 무조건 화면에 꽉 채우고 JSON focusX/focusY를 크롭 기준점으로 사용한다. */
+        .char-custom-layout.char-panel-closed #char-preview-bg {
+            object-fit:cover;
+            object-position:var(--bg-focus-x) var(--bg-focus-y);
+        }
+        .char-custom-layout.char-panel-closed #char-preview-zone::before {
+            opacity:0;
+        }
+        #char-preview-body {
+            position:absolute; left:50%; top:50%; bottom:auto;
+            width:58%; height:68%; object-fit:contain; object-position:center center;
+            transform:translate(-50%,-50%); z-index:2; padding:0;
+            transition:left .28s ease, top .28s ease, width .28s ease, height .28s ease, transform .18s ease;
+            touch-action:none; user-select:none; -webkit-user-drag:none;
+        }
+        .char-custom-layout.char-panel-closed #char-preview-body {
+            left:var(--char-x); top:var(--char-y); width:44%; height:58%; cursor:grab;
+        }
+        .char-custom-layout.char-panel-closed #char-preview-body.dragging {
+            cursor:grabbing; transition:none; transform:translate(-50%,-50%) scale(1.02);
+        }
+        .char-custom-layout.char-panel-closed #char-preview-body.pet-bounce { animation:charPetBounce .46s ease; }
+        @keyframes charPetBounce {
+            0%,100% { transform:translate(-50%,-50%) scale(1); }
+            40% { transform:translate(-50%,-53%) scale(1.035); }
+            70% { transform:translate(-50%,-49%) scale(.995); }
+        }
+        .char-love-heart {
+            position:absolute; z-index:8; pointer-events:none;
+            transform:translate(-50%,-50%) scale(.7);
+            animation:charHeartFloat .95s ease-out forwards;
+            font-size:16px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));
+        }
+        @keyframes charHeartFloat {
+            0% { opacity:0; transform:translate(-50%,-35%) scale(.55) rotate(-8deg); }
+            18% { opacity:1; }
+            100% { opacity:0; transform:translate(calc(-50% + var(--heart-x)), calc(-50% - 62px)) scale(1.2) rotate(var(--heart-r)); }
+        }
+
+        /* 캐릭터 교감 반응: 짧고 가볍게, 꾸미기 UI와 충돌하지 않게 구성 */
+        .char-custom-layout.char-panel-closed #char-preview-body.love-react {
+            animation:charLoveReact .72s cubic-bezier(.22,.85,.32,1);
+        }
+        @keyframes charLoveReact {
+            0%,100% {
+                transform:translate(-50%,-50%) scale(var(--char-user-scale,1))
+                    rotate(var(--char-user-rotate,0deg)) scaleX(var(--char-user-flip,1));
+            }
+            22% {
+                transform:translate(-50%,-54%) scale(calc(var(--char-user-scale,1) * 1.045))
+                    rotate(calc(var(--char-user-rotate,0deg) - 3deg)) scaleX(var(--char-user-flip,1));
+            }
+            48% {
+                transform:translate(-50%,-50%) scale(calc(var(--char-user-scale,1) * .985))
+                    rotate(calc(var(--char-user-rotate,0deg) + 3deg)) scaleX(var(--char-user-flip,1));
+            }
+            72% {
+                transform:translate(-50%,-52%) scale(calc(var(--char-user-scale,1) * 1.018))
+                    rotate(calc(var(--char-user-rotate,0deg) - 1deg)) scaleX(var(--char-user-flip,1));
+            }
+        }
+        .char-love-spark {
+            position:absolute; z-index:9; pointer-events:none;
+            left:var(--sx); top:var(--sy);
+            font-size:var(--ss,13px);
+            transform:translate(-50%,-50%) scale(.25) rotate(var(--sr,0deg));
+            animation:charSparkPop .8s ease-out forwards;
+            filter:drop-shadow(0 1px 2px rgba(0,0,0,.12));
+        }
+        @keyframes charSparkPop {
+            0% { opacity:0; transform:translate(-50%,-50%) scale(.2) rotate(var(--sr,0deg)); }
+            22% { opacity:1; transform:translate(-50%,-50%) scale(1.18) rotate(var(--sr,0deg)); }
+            65% { opacity:1; }
+            100% { opacity:0; transform:translate(-50%,calc(-50% - 24px)) scale(.75) rotate(calc(var(--sr,0deg) + 24deg)); }
+        }
+        .char-love-bubble {
+            position:absolute; z-index:10; pointer-events:none;
+            padding:5px 8px; border-radius:999px;
+            background:rgba(255,255,255,.92);
+            border:1px solid rgba(255,168,196,.72);
+            box-shadow:0 4px 12px rgba(76,42,72,.14);
+            color:#ff477e; font-size:13px; font-weight:900;
+            transform:translate(-50%,-50%) scale(.7);
+            animation:charLoveBubble .92s cubic-bezier(.2,.8,.25,1) forwards;
+        }
+        @keyframes charLoveBubble {
+            0% { opacity:0; transform:translate(-50%,-30%) scale(.55); }
+            18% { opacity:1; transform:translate(-50%,-52%) scale(1.05); }
+            72% { opacity:1; transform:translate(-50%,-62%) scale(1); }
+            100% { opacity:0; transform:translate(-50%,-82%) scale(.92); }
+        }
+        .char-love-aura {
+            position:absolute; z-index:3; pointer-events:none;
+            width:88px; height:88px; border-radius:50%;
+            border:2px solid rgba(255,112,160,.42);
+            box-shadow:0 0 20px rgba(255,112,160,.22), inset 0 0 18px rgba(255,255,255,.28);
+            transform:translate(-50%,-50%) scale(.35);
+            animation:charLoveAura .68s ease-out forwards;
+        }
+        @keyframes charLoveAura {
+            0% { opacity:0; transform:translate(-50%,-50%) scale(.35); }
+            20% { opacity:.9; }
+            100% { opacity:0; transform:translate(-50%,-50%) scale(1.55); }
+        }
         
+        /* ================= 캐릭터 감상/꾸미기 모드 ================= */
+        #char-emoji-layer { position:absolute; inset:0; z-index:4; pointer-events:none; }
+        .placed-emoji { position:absolute; left:var(--emoji-x); top:var(--emoji-y); transform:translate(-50%,-50%); font-size:clamp(24px,7vw,42px); line-height:1; user-select:none; touch-action:none; filter:drop-shadow(0 2px 3px rgba(0,0,0,.18)); }
+        .char-custom-layout.char-editing .placed-emoji { pointer-events:auto; cursor:grab; outline:1px dashed rgba(255,255,255,.42); border-radius:10px; padding:3px; }
+        .char-custom-layout.char-editing .placed-emoji.dragging { cursor:grabbing; outline:2px solid rgba(255,255,255,.9); }
+        #char-customize-btn { display:none; position:absolute; right:14px; bottom:16px; z-index:12; border:1px solid rgba(255,255,255,.72); border-radius:999px; background:rgba(34,25,48,.58); color:#fff; backdrop-filter:blur(8px); padding:8px 13px; font-size:12px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+        .char-custom-layout.char-panel-closed:not(.char-editing) #char-customize-btn { display:block; }
+        #char-customize-topbar { display:none; position:absolute; z-index:15; left:10px; right:10px; top:10px; height:36px; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; border-radius:12px; background:rgba(30,24,40,.62); backdrop-filter:blur(9px); color:white; }
+        #char-customize-topbar button { border:0; border-radius:9px; padding:6px 10px; font-size:11px; font-weight:900; background:rgba(255,255,255,.18); color:#fff; }
+        #char-customize-topbar button.primary { background:#ff477e; }
+        #char-customize-toolbar { display:none; position:absolute; z-index:15; left:10px; right:10px; bottom:12px; border-radius:14px; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); padding:8px; box-shadow:0 5px 22px rgba(45,28,65,.22); }
+        .char-custom-layout.char-editing.char-panel-closed #char-customize-topbar, .char-custom-layout.char-editing.char-panel-closed #char-customize-toolbar { display:flex; }
+        .char-custom-layout.char-editing #char-customize-toolbar { flex-direction:column; gap:7px; }
+        .char-edit-targets, .char-edit-controls, .char-emoji-actions { display:flex; gap:5px; align-items:center; justify-content:center; flex-wrap:wrap; }
+        .char-edit-targets button, .char-edit-controls button, .char-emoji-actions button { border:1px solid #ddd0ec; background:#fff; color:#6a4c9c; border-radius:9px; min-height:30px; padding:5px 9px; font-size:11px; font-weight:900; cursor:pointer; }
+        .char-edit-targets button.active { background:#6a4c9c; color:white; border-color:#6a4c9c; }
+        .char-edit-controls span { min-width:30px; text-align:center; color:#75638e; font-size:10px; font-weight:900; }
+        .char-emoji-actions button.danger { color:#d63031; border-color:#f3c4c4; background:#fff8f8; }
+        #char-edit-background-controls { display:none; }
+        .char-custom-layout.edit-target-background #char-edit-character-controls { display:none; }
+        .char-custom-layout.edit-target-background #char-edit-background-controls { display:flex; }
+        .char-custom-layout.char-editing #char-preview-body { cursor:grab; }
+        .char-custom-layout.char-editing.edit-target-background #char-preview-body { pointer-events:none; opacity:.92; }
+        .char-custom-layout.char-editing.edit-target-background #char-preview-bg { cursor:grab; }
+        .char-custom-layout.char-panel-closed #char-preview-bg { transform:scale(var(--bg-user-scale,1)); transform-origin:center center; }
+        .char-custom-layout.char-panel-closed #char-preview-body { transform:translate(-50%,-50%) scale(var(--char-user-scale,1)) rotate(var(--char-user-rotate,0deg)) scaleX(var(--char-user-flip,1)); }
+        .char-custom-layout.char-panel-closed #char-preview-body.dragging { transform:translate(-50%,-50%) scale(var(--char-user-scale,1)) rotate(var(--char-user-rotate,0deg)) scaleX(var(--char-user-flip,1)); }
+        .char-custom-layout.char-panel-closed #char-preview-body.pet-bounce { animation:charPetGlow .46s ease; }
+        @keyframes charPetGlow { 0%,100%{filter:drop-shadow(0 0 0 rgba(255,94,150,0))} 45%{filter:drop-shadow(0 0 10px rgba(255,94,150,.72))} }
+        .emoji-library .char-item-btn { font-size:28px; min-height:58px; aspect-ratio:1; }
+        .emoji-library .char-item-btn .char-tier-badge { font-size:8px; }
+        @media(max-width:430px){ #char-customize-toolbar{left:6px;right:6px;bottom:8px;padding:7px} .char-edit-targets button,.char-edit-controls button,.char-emoji-actions button{font-size:10px;padding:5px 7px;min-height:28px} }
+
         #char-toggle-btn {
             position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 20;
             background: rgba(255,255,255,0.9); color: #6a4c9c;
@@ -524,8 +696,8 @@
 <span class="icon-main" id="mult-label">x1</span><div class="cost-label" id="mult-cost">무료</div>
 </button>
 <!-- 전투 아이템 골드 비용 -->
-<button class="btn-item btn-hammer" onclick="useItem('hammer')">
-<span class="icon-main">🔨</span>망치
+<button class="btn-item btn-organize" onclick="useItem('organize')">
+<span class="icon-main">🧲</span>정리
                             <div class="cost-label" style="color:#d35400;">🪙 100</div>
 </button>
 <button class="btn-item btn-auto" id="btn-auto" onclick="toggleAutoDrop()">
@@ -562,6 +734,17 @@
 <div id="char-preview-zone">
 <img id="char-preview-bg" onerror="handleAssetImageError(this)" onload="handleAssetImageLoad(this)" src="assets/art/backgrounds/lobby/bg_lobby_0001.png"/>
 <img id="char-preview-body" onerror="handleAssetImageError(this)" onload="handleAssetImageLoad(this)" src="assets/art/characters/char_0001.png"/>
+<div id="char-emoji-layer" aria-label="배치된 이모지"></div>
+<button id="char-customize-btn" onclick="enterCharCustomizeMode()">✦ 꾸미기</button>
+<div id="char-customize-topbar">
+  <button onclick="cancelCharCustomizeMode()">취소</button><b>꾸미기</b><button class="primary" onclick="finishCharCustomizeMode()">완료</button>
+</div>
+<div id="char-customize-toolbar">
+  <div class="char-edit-targets"><button id="char-edit-character" onclick="setCharEditTarget('character')">캐릭터</button><button id="char-edit-background" onclick="setCharEditTarget('background')">배경</button><button onclick="openEmojiLibrary()">😊 이모지</button></div>
+  <div id="char-edit-character-controls" class="char-edit-controls"><button onclick="adjustCharScale(-0.08)">−</button><span>크기</span><button onclick="adjustCharScale(0.08)">＋</button><button onclick="adjustCharRotate(-8)">↶</button><span>회전</span><button onclick="adjustCharRotate(8)">↷</button><button onclick="flipCharacter()">⇆ 반전</button><button onclick="resetCharacterTransform()">↺ 초기화</button></div>
+  <div id="char-edit-background-controls" class="char-edit-controls"><button onclick="adjustBackgroundScale(-0.08)">−</button><span>확대</span><button onclick="adjustBackgroundScale(0.08)">＋</button><button onclick="resetBackgroundTransform()">↺ 초기화</button></div>
+  <div class="char-emoji-actions"><button onclick="openEmojiLibrary()">＋ 이모지 추가</button><button class="danger" onclick="clearPlacedEmojis()">🗑 이모지 전체 삭제</button></div>
+</div>
 <button id="char-toggle-btn" onclick="toggleCharItemZone()">◀</button>
 </div>
 <!-- 💡 우측 패널 (아이템 리스트 + 탭) -->
@@ -655,7 +838,7 @@
 <div class="setting-row"><div><div class="setting-name">게임 실행 시 자동 시작</div><div class="setting-desc">실행 직후 플레이 화면과 자동 드롭 상태를 복원</div></div><button class="toggle-switch" id="setting-auto-start" onclick="toggleGameSetting('autoStart')">OFF</button></div>
 <div class="setting-row"><div><div class="setting-name">백그라운드에서도 진행</div><div class="setting-desc">다른 창을 보고 있을 때도 물리/오토 드롭 진행</div></div><button class="toggle-switch on" id="setting-background" onclick="toggleGameSetting('backgroundProgress')">ON</button></div>
 <div class="setting-row"><div><div class="setting-name">위험 시 자동 일시정지</div><div class="setting-desc">데드라인 위험 상태에서 오토 드롭을 멈춤</div></div><button class="toggle-switch on" id="setting-danger" onclick="toggleGameSetting('dangerAutoPause')">ON</button></div>
-<div class="setting-row"><div><div class="setting-name">UR 특수 연출</div><div class="setting-desc">UR 획득 시 전용 축하 효과</div></div><button class="toggle-switch on" id="setting-ss" onclick="toggleGameSetting('ssEffect')">ON</button></div>
+<div class="setting-row"><div><div class="setting-name">SSR/UR 특수 연출</div><div class="setting-desc">SSR 또는 UR 획득 시 전용 축하 효과</div></div><button class="toggle-switch on" id="setting-ss" onclick="toggleGameSetting('ssEffect')">ON</button></div>
 </div>
 
 <div class="settings-group"><div class="settings-title">🔊 사운드</div>
@@ -718,7 +901,7 @@
     let bossActive = false;
     let bossMaxHp = 250;
     let bossHp = bossMaxHp;
-    let firstRewardForcesSS = true;
+    let firstRewardForcesUR = true;
 
     const uiMerge = document.getElementById('val-merge');
     const uiGold = document.getElementById('val-gold');
@@ -1247,11 +1430,8 @@
     let BATTLE_CHARS_GACHA_DB = Object.fromEntries(TIER_ORDER.map(t=>[t,[]]));
     let SKIN_DB = Object.fromEntries(TIER_ORDER.map(t=>[t,[]]));
     const ITEMS_DB = {
-        UR:  ['🌌', '🌠', '🎆', '🎇', '👑'],
-        SSR: ['🐉', '🦄', '🦅', '🦁', '🐯', '🦈', '🐙', '🦋', '🦖', '🦚'],
-        SR:  ['🚀', '🛸', '🚁', '🛰️', '🎠', '🏎️', '🏍️', '🛳️', '🚄', '🚜'],
-        R:   ['💎', '💍', '🎩', '🔮', '🧿', '🏺', '🎭', '🎨', '🎲', '🧩', '🎸', '🎷'],
-        N:   ['🪴', '🧸', '📚', '☕', '📺', '🕹️', '🐈', '🖼️', '🕰️', '🛋️', '🛏️', '🌵', '📻', '🛹', '🪀']
+        N: ['🪴', '🧸', '📚', '☕', '📺', '🕹️', '🐈', '🖼️', '🕰️', '🛋️', '🛏️', '🌵', '📻', '🛹', '🪀', '🌌', '🌠', '🎆', '🎇', '👑', '🐉', '🦄', '🦅', '🦁', '🐯', '🦈', '🐙', '🦋', '🦖', '🦚', '🚀', '🛸', '🚁', '🛰️', '🎠', '🏎️', '🏍️', '🛳️', '🚄', '🚜', '💎', '💍', '🎩', '🔮', '🧿', '🏺', '🎭', '🎨', '🎲', '🧩', '🎸', '🎷', '💗', '💕', '💖', '❤️', '🩷', '💜', '💙', '💛', '🤍', '✨', '⭐', '🌟', '💫', '🌙', '☀️', '☁️', '🌈', '❄️', '🔥', '🫧', '🎀', '🎈', '🎉', '🎊', '🪩', '🕯️', '🏮', '💡', '🪄', '🧚', '🪽', '🌸', '🌼', '🌻', '🌷', '🌹', '🍀', '🍁', '🍂', '🌿', '🍃', '🌱', '🌳', '🍄', '🪻', '🐕', '🐇', '🐹', '🐿️', '🦊', '🐻', '🐼', '🐨', '🐧', '🐥', '🦆', '🦢', '🦉', '🐝', '🐞', '🐌', '🐠', '🐬', '🦭', '🍓', '🍒', '🍑', '🍋', '🍊', '🍎', '🍉', '🍰', '🧁', '🍪', '🍩', '🍭', '🍬', '🍫', '🍿', '🥤', '🧋', '🍵', '🥐', '🥨', '🎁', '💌', '📷', '🎧', '🎮', '🪞', '🪟', '🪑', '🧺', '🫖', '🪭', '🧵', '🪡', '🧶', '📖', '✏️', '🖍️', '📝', '🎵', '🎶', '🎹', '🎻', '🌂', '👒', '🧢', '👓', '🕶️', '👜', '👛', '🧣', '🧤', '👟', '🥿', '🪁', '🛼', '🚲', '🛴', '⛺', '🏕️', '🏠', '🏡', '🏰', '⛲', '🎡', '🎢', '🎪'],
+        R: [], SR: [], SSR: [], UR: []
     };
     let BG_TYPE_DB = {
         bg_battle:Object.fromEntries(TIER_ORDER.map(t=>[t,[]])),
@@ -1558,8 +1738,8 @@
         const results = [];
         const categories = ['item', 'skin', 'char', 'battle_char', 'char_bg', 'bg_battle', 'bg_merge', 'bg_border'];
         for (let i=0; i<times; i++) {
-            let tier = firstRewardForcesSS ? 'UR' : rollTier();
-            if (firstRewardForcesSS) firstRewardForcesSS = false;
+            let tier = firstRewardForcesUR ? 'UR' : rollTier();
+            if (firstRewardForcesUR) firstRewardForcesUR = false;
             let validCats = categories.filter(cat => getPool(cat, tier).length > 0);
             if (validCats.length === 0) { tier = 'N'; validCats = categories.filter(cat => getPool(cat, tier).length > 0); }
             if (validCats.length === 0) continue;
@@ -1577,9 +1757,11 @@
     function showGachaResults(results, title='🎉 획득 성공! 🎉') {
         setGlobalPause(true);
         const resultEl = document.getElementById('event-result');
-        const hasSS = results.some(r => r.tier === 'UR') && gameSettings.ssEffect;
-        resultEl.classList.toggle('ss-celebration', hasSS);
-        const header = hasSS ? `<div class="ss-rays">✨⭐🌟⭐✨</div><div class="ss-special-title">SS 획득!</div><div style="margin-top:5px;color:#fff3a0;font-weight:900;">LEGENDARY REWARD</div>` : `<h2 style="margin-bottom:20px; color:#f6e58d;">${title}</h2>`;
+        const specialTier = results.some(r => r.tier === 'UR') ? 'UR' : (results.some(r => r.tier === 'SSR') ? 'SSR' : null);
+        const hasSpecial = !!specialTier && gameSettings.ssEffect;
+        resultEl.classList.toggle('ss-celebration', hasSpecial);
+        const specialSub = specialTier === 'UR' ? 'ULTRA RARE REWARD' : 'SUPER RARE REWARD';
+        const header = hasSpecial ? `<div class="ss-rays">✨⭐🌟⭐✨</div><div class="ss-special-title">${specialTier} 획득!</div><div style="margin-top:5px;color:#fff3a0;font-weight:900;">${specialSub}</div>` : `<h2 style="margin-bottom:20px; color:#f6e58d;">${title}</h2>`;
         resultEl.innerHTML = `${header}<div id="gacha-grid" style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:20px; width:90%; max-width:360px;"></div><button class="action-btn" style="margin-top:30px;" onclick="closeGacha()">확인</button>`;
         const grid = document.getElementById('gacha-grid');
         results.forEach((drop, index) => {
@@ -1622,6 +1804,7 @@
     function getAllCraftableItems() {
         let items = [];
         TIER_ORDER.forEach(tier => {
+            if (tier === 'UR') return; // UR은 최종 등급: 합성 가능 목록에 표시하지 않음
             CHARS_DB[tier].forEach(id => { if(charInventory[id].count > 1) items.push({category:'char', id, tier, count: charInventory[id].count}); });
             BATTLE_CHARS_DB[tier].forEach(id => { if((battleCharInventory[id]?.count||0) > 1) items.push({category:'battle_char', id, tier, count: battleCharInventory[id].count}); });
             CHAR_BG_DB[tier].forEach(id => { if(charBgInventory[id].count > 1) items.push({category:'char_bg', id, tier, count: charBgInventory[id].count}); });
@@ -1747,17 +1930,8 @@
     // ================= [ 💡 캐릭터 시스템 (뷰 3) 우측 탭 디자인 반영 ] =================
     const CHAR_CATEGORIES = [
         { id: 'bg', name: '배경', type: 'ready', path: 'assets/art/backgrounds/lobby/' },
-        { id: 'body', name: '바디', type: 'ready', path: 'assets/art/characters/' },
-        { id: 'hair', name: '헤어', type: 'prep' },
-        { id: 'eyes', name: '눈', type: 'prep' },
-        { id: 'nose', name: '코', type: 'prep' },
-        { id: 'mouth', name: '입', type: 'prep' },
-        { id: 'top', name: '상의', type: 'prep' },
-        { id: 'bottom', name: '하의', type: 'prep' },
-        { id: 'hat', name: '모자', type: 'prep' },
-        { id: 'wrist', name: '손목', type: 'prep' },
-        { id: 'shoes', name: '신발', type: 'prep' },
-        { id: 'acc', name: '악세사리', type: 'prep' }
+        { id: 'body', name: '캐릭터', type: 'ready', path: 'assets/art/characters/' },
+        { id: 'emoji', name: '이모지', type: 'ready' }
     ];
 
     let charConfig = { bg: 1, body: 0 };
@@ -1769,6 +1943,46 @@
     let charBodyPage = 0;
     let charBodyTierFilter = 'ALL';
     const CHAR_BODY_PAGE_SIZE = 12;
+    let charEmojiPage = 0;
+    let charEmojiTierFilter = 'ALL';
+    const CHAR_EMOJI_PAGE_SIZE = 20;
+
+    // 감상/꾸미기 상태: 게임 데이터와 분리하여 사용자 로컬 설정으로만 저장
+    let charCustomizeMode = false;
+    let charEditTarget = 'character'; // character | background
+    let sceneEmojiSerial = 0;
+    let charScene = {
+        character: { x:50, y:54, scale:1, rotate:0, flip:1 },
+        backgroundById: {},
+        emojis: []
+    };
+    const CHAR_SCENE_SAVE_KEY = 'mergeRoll.characterScene.v1';
+
+    function loadCharScene() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(CHAR_SCENE_SAVE_KEY) || 'null');
+            if (saved && typeof saved === 'object') {
+                if (saved.character) charScene.character = {...charScene.character, ...saved.character};
+                if (saved.backgroundById) charScene.backgroundById = saved.backgroundById;
+                if (Array.isArray(saved.emojis)) charScene.emojis = saved.emojis.slice(0, 80);
+                sceneEmojiSerial = charScene.emojis.reduce((m,e)=>Math.max(m, Number(e.uid)||0),0);
+            }
+        } catch(e) { console.warn('[Merge&Roll] 캐릭터 꾸미기 저장값 로드 실패', e); }
+    }
+    function saveCharScene() {
+        try { localStorage.setItem(CHAR_SCENE_SAVE_KEY, JSON.stringify(charScene)); } catch(e) {}
+    }
+    function currentBgAdjust() {
+        const meta = BACKGROUND_META?.lobby?.[charConfig.bg] || {};
+        if (!charScene.backgroundById[charConfig.bg]) {
+            charScene.backgroundById[charConfig.bg] = {
+                x: Number.isFinite(Number(meta.focusX)) ? Number(meta.focusX) : 50,
+                y: Number.isFinite(Number(meta.focusY)) ? Number(meta.focusY) : 50,
+                scale: 1
+            };
+        }
+        return charScene.backgroundById[charConfig.bg];
+    }
 
     window.toggleCharItemZone = function(forceHide) {
         const panel = document.getElementById('char-right-panel');
@@ -1779,17 +1993,244 @@
         else isCharItemZoneHidden = !isCharItemZoneHidden;
 
         panel.classList.toggle('hidden', isCharItemZoneHidden);
+        const layout = document.querySelector('.char-custom-layout');
+        if (layout) layout.classList.toggle('char-panel-closed', isCharItemZoneHidden); // 닫힘: cover 몰입 모드 / 열림: contain 선택 모드
         btn.innerText = isCharItemZoneHidden ? '▶' : '◀';
         btn.setAttribute('aria-label', isCharItemZoneHidden ? '캐릭터 아이템 패널 열기' : '캐릭터 아이템 패널 닫기');
+        if (!isCharItemZoneHidden) {
+            const body = document.getElementById('char-preview-body');
+            if (body) body.classList.remove('dragging');
+        }
     };
+
+    let charLoveBound = false;
+    let charDragState = null;
+
+    let charLoveTapCount = 0;
+
+    function spawnCharacterHearts(clientX, clientY) {
+        const zone = document.getElementById('char-preview-zone');
+        const body = document.getElementById('char-preview-body');
+        if (!zone || !body || charCustomizeMode) return;
+
+        const rect = zone.getBoundingClientRect();
+        const br = body.getBoundingClientRect();
+        const x = clientX ? clientX - rect.left : br.left + br.width/2 - rect.left;
+        const y = clientY ? clientY - rect.top : br.top + br.height*.36 - rect.top;
+
+        charLoveTapCount++;
+
+        // 1) 캐릭터 자체가 고개를 살짝 갸웃하고 통통 튀는 반응
+        body.classList.remove('love-react', 'pet-bounce');
+        void body.offsetWidth;
+        body.classList.add('love-react');
+        setTimeout(() => body.classList.remove('love-react'), 760);
+
+        // 2) 캐릭터 주변에 부드러운 핑크 오라
+        const aura = document.createElement('span');
+        aura.className = 'char-love-aura';
+        aura.style.left = `${x}px`;
+        aura.style.top = `${y + 10}px`;
+        zone.appendChild(aura);
+        setTimeout(() => aura.remove(), 760);
+
+        // 3) 하트가 한 방향으로만 뜨지 않도록 자연스럽게 퍼짐
+        const hearts = ['💗','💕','💖','💓','💞'];
+        const offsets = [-34, -18, 0, 19, 35];
+        for (let i=0; i<5; i++) {
+            const h = document.createElement('span');
+            h.className = 'char-love-heart';
+            h.textContent = hearts[(charLoveTapCount + i) % hearts.length];
+            h.style.left = `${x + offsets[i] * .35}px`;
+            h.style.top = `${y + 5 - (i%2)*7}px`;
+            h.style.fontSize = `${14 + (i%3)*2}px`;
+            h.style.setProperty('--heart-x', `${offsets[i]}px`);
+            h.style.setProperty('--heart-r', `${-15 + i*8}deg`);
+            h.style.animationDelay = `${i*35}ms`;
+            zone.appendChild(h);
+            setTimeout(() => h.remove(), 1150);
+        }
+
+        // 4) 작은 반짝이. 하트보다 짧게 보여 과한 파티클 느낌은 피함.
+        const sparkChars = ['✨','✦','⋆','✨'];
+        const sparkPos = [
+            [-50,-28], [47,-20], [-38,22], [43,28]
+        ];
+        sparkPos.forEach((p, i) => {
+            const s = document.createElement('span');
+            s.className = 'char-love-spark';
+            s.textContent = sparkChars[i];
+            s.style.setProperty('--sx', `${x+p[0]}px`);
+            s.style.setProperty('--sy', `${y+p[1]}px`);
+            s.style.setProperty('--ss', `${11 + i%2*3}px`);
+            s.style.setProperty('--sr', `${-20 + i*15}deg`);
+            s.style.animationDelay = `${50 + i*45}ms`;
+            zone.appendChild(s);
+            setTimeout(() => s.remove(), 1000);
+        });
+
+        // 5) 매번 같은 반응보다 작은 변화가 있도록 감정 말풍선을 순환
+        const bubbles = ['♥', '♪', '♡', '✨'];
+        const bubble = document.createElement('span');
+        bubble.className = 'char-love-bubble';
+        bubble.textContent = bubbles[(charLoveTapCount - 1) % bubbles.length];
+        bubble.style.left = `${Math.min(rect.width-24, Math.max(24, x + br.width*.18))}px`;
+        bubble.style.top = `${Math.max(30, y - br.height*.19)}px`;
+        zone.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 1050);
+    }
+
+    function setupCharacterLoveInteraction() {
+        if (charLoveBound) return;
+        const body = document.getElementById('char-preview-body');
+        const zone = document.getElementById('char-preview-zone');
+        const bg = document.getElementById('char-preview-bg');
+        if (!body || !zone || !bg) return;
+        charLoveBound = true;
+
+        body.addEventListener('pointerdown', (e) => {
+            if (!isCharItemZoneHidden) return;
+            if (charCustomizeMode && charEditTarget !== 'character') return;
+            e.preventDefault();
+            charDragState = { pointerId:e.pointerId, kind:'character', startX:e.clientX, startY:e.clientY, moved:false };
+            body.setPointerCapture?.(e.pointerId); body.classList.add('dragging');
+        });
+        body.addEventListener('pointermove', (e) => {
+            if (!charDragState || charDragState.kind!=='character' || charDragState.pointerId !== e.pointerId || !isCharItemZoneHidden) return;
+            const rect = zone.getBoundingClientRect();
+            if (Math.hypot(e.clientX-charDragState.startX, e.clientY-charDragState.startY) > 6) charDragState.moved = true;
+            if (!charCustomizeMode) return;
+            const px = Math.max(rect.width*.12, Math.min(rect.width*.88, e.clientX - rect.left));
+            const py = Math.max(rect.height*.14, Math.min(rect.height*.86, e.clientY - rect.top));
+            charScene.character.x = px/rect.width*100; charScene.character.y = py/rect.height*100;
+            applySceneTransforms(false);
+        });
+        const finish = (e) => {
+            if (!charDragState || charDragState.kind!=='character' || charDragState.pointerId !== e.pointerId) return;
+            const wasMoved = charDragState.moved; body.classList.remove('dragging'); body.releasePointerCapture?.(e.pointerId); charDragState = null;
+            if (charCustomizeMode) { if(wasMoved) saveCharScene(); return; }
+            if (!wasMoved && isCharItemZoneHidden) spawnCharacterHearts(e.clientX, e.clientY);
+            if (wasMoved) saveCharScene();
+        };
+        body.addEventListener('pointerup', finish);
+        body.addEventListener('pointercancel', ()=>{body.classList.remove('dragging');charDragState=null;});
+
+        let bgDrag = null;
+        bg.addEventListener('pointerdown',(e)=>{
+            if (!charCustomizeMode || charEditTarget!=='background' || !isCharItemZoneHidden) return;
+            e.preventDefault();
+            const adj=currentBgAdjust();
+            bgDrag={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,baseX:adj.x,baseY:adj.y};
+            bg.setPointerCapture?.(e.pointerId);
+        });
+        bg.addEventListener('pointermove',(e)=>{
+            if(!bgDrag || bgDrag.pointerId!==e.pointerId) return;
+            const rect=zone.getBoundingClientRect(), adj=currentBgAdjust();
+            adj.x=Math.max(0,Math.min(100,bgDrag.baseX-(e.clientX-bgDrag.startX)/rect.width*55));
+            adj.y=Math.max(0,Math.min(100,bgDrag.baseY-(e.clientY-bgDrag.startY)/rect.height*55));
+            applySceneTransforms(false);
+        });
+        const bgFinish=(e)=>{ if(bgDrag&&bgDrag.pointerId===e.pointerId){bg.releasePointerCapture?.(e.pointerId);bgDrag=null;saveCharScene();} };
+        bg.addEventListener('pointerup',bgFinish); bg.addEventListener('pointercancel',bgFinish);
+    }
+
+    function applySceneTransforms(persist=false) {
+        const zone=document.getElementById('char-preview-zone'); if(!zone) return;
+        const c=charScene.character;
+        zone.style.setProperty('--char-x', `${Math.max(8,Math.min(92,Number(c.x)||50))}%`);
+        zone.style.setProperty('--char-y', `${Math.max(10,Math.min(90,Number(c.y)||54))}%`);
+        zone.style.setProperty('--char-user-scale', String(Math.max(.55,Math.min(1.65,Number(c.scale)||1))));
+        zone.style.setProperty('--char-user-rotate', `${Math.max(-35,Math.min(35,Number(c.rotate)||0))}deg`);
+        zone.style.setProperty('--char-user-flip', Number(c.flip)===-1 ? '-1' : '1');
+        const b=currentBgAdjust();
+        zone.style.setProperty('--bg-focus-x', `${Math.max(0,Math.min(100,Number(b.x)||50))}%`);
+        zone.style.setProperty('--bg-focus-y', `${Math.max(0,Math.min(100,Number(b.y)||50))}%`);
+        zone.style.setProperty('--bg-user-scale', String(Math.max(1,Math.min(1.8,Number(b.scale)||1))));
+        renderPlacedEmojis();
+        if(persist) saveCharScene();
+    }
+
+    let charCustomizeSnapshot=null;
+    window.enterCharCustomizeMode=function(){
+        if(!isCharItemZoneHidden) toggleCharItemZone(true);
+        charCustomizeSnapshot=JSON.stringify(charScene);
+        charCustomizeMode=true; setCharEditTarget('character');
+        document.querySelector('.char-custom-layout')?.classList.add('char-editing');
+        applySceneTransforms(false);
+    };
+    window.finishCharCustomizeMode=function(){ charCustomizeMode=false; charCustomizeSnapshot=null; document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background'); saveCharScene(); };
+    window.cancelCharCustomizeMode=function(){
+        if(charCustomizeSnapshot){ try{charScene=JSON.parse(charCustomizeSnapshot);}catch(e){} }
+        charCustomizeMode=false; charCustomizeSnapshot=null; document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background'); applySceneTransforms(false);
+    };
+    window.setCharEditTarget=function(target){
+        charEditTarget=target==='background'?'background':'character';
+        const layout=document.querySelector('.char-custom-layout'); layout?.classList.toggle('edit-target-background',charEditTarget==='background');
+        document.getElementById('char-edit-character')?.classList.toggle('active',charEditTarget==='character');
+        document.getElementById('char-edit-background')?.classList.toggle('active',charEditTarget==='background');
+    };
+    window.adjustCharScale=function(delta){charScene.character.scale=Math.max(.55,Math.min(1.65,(Number(charScene.character.scale)||1)+delta));applySceneTransforms(true);};
+    window.adjustCharRotate=function(delta){charScene.character.rotate=Math.max(-35,Math.min(35,(Number(charScene.character.rotate)||0)+delta));applySceneTransforms(true);};
+    window.flipCharacter=function(){charScene.character.flip=Number(charScene.character.flip)===-1?1:-1;applySceneTransforms(true);};
+    window.resetCharacterTransform=function(){charScene.character={x:50,y:54,scale:1,rotate:0,flip:1};applySceneTransforms(true);};
+    window.adjustBackgroundScale=function(delta){const b=currentBgAdjust();b.scale=Math.max(1,Math.min(1.8,(Number(b.scale)||1)+delta));applySceneTransforms(true);};
+    window.resetBackgroundTransform=function(){const m=BACKGROUND_META?.lobby?.[charConfig.bg]||{};charScene.backgroundById[charConfig.bg]={x:Number(m.focusX)||50,y:Number(m.focusY)||50,scale:1};applySceneTransforms(true);};
+    window.openEmojiLibrary=function(){ if(isCharItemZoneHidden)toggleCharItemZone(false); selectCharCategory('emoji'); };
+    window.clearPlacedEmojis=function(){ if(!charScene.emojis.length)return; if(confirm('배치한 이모지를 모두 삭제할까요?')){charScene.emojis=[];renderPlacedEmojis();saveCharScene();} };
+    function addPlacedEmoji(symbol){
+        if(charScene.emojis.length>=50){ if(typeof showToast==='function') showToast('이모지는 최대 50개까지 배치할 수 있어요.'); else alert('이모지는 최대 50개까지 배치할 수 있어요.'); return; }
+        sceneEmojiSerial++;
+        const offset=(charScene.emojis.length%7)-3;
+        charScene.emojis.push({uid:sceneEmojiSerial,symbol,x:50+offset*3,y:48+((charScene.emojis.length%5)-2)*3});
+        renderPlacedEmojis();saveCharScene();
+    }
+    function renderPlacedEmojis(){
+        const layer=document.getElementById('char-emoji-layer'); if(!layer)return; layer.innerHTML='';
+        charScene.emojis.forEach(e=>{
+            const el=document.createElement('span'); el.className='placed-emoji'; el.textContent=e.symbol; el.dataset.uid=e.uid;
+            el.style.setProperty('--emoji-x',`${Math.max(4,Math.min(96,Number(e.x)||50))}%`); el.style.setProperty('--emoji-y',`${Math.max(5,Math.min(95,Number(e.y)||50))}%`);
+            let drag=null;
+            el.addEventListener('pointerdown',ev=>{if(!charCustomizeMode)return;ev.stopPropagation();ev.preventDefault();drag={id:ev.pointerId,sx:ev.clientX,sy:ev.clientY,bx:e.x,by:e.y};el.setPointerCapture?.(ev.pointerId);el.classList.add('dragging');});
+            el.addEventListener('pointermove',ev=>{if(!drag||drag.id!==ev.pointerId)return;const r=layer.getBoundingClientRect();e.x=Math.max(4,Math.min(96,drag.bx+(ev.clientX-drag.sx)/r.width*100));e.y=Math.max(5,Math.min(95,drag.by+(ev.clientY-drag.sy)/r.height*100));el.style.setProperty('--emoji-x',`${e.x}%`);el.style.setProperty('--emoji-y',`${e.y}%`);});
+            const fin=ev=>{if(drag&&drag.id===ev.pointerId){el.releasePointerCapture?.(ev.pointerId);drag=null;el.classList.remove('dragging');saveCharScene();}}; el.addEventListener('pointerup',fin);el.addEventListener('pointercancel',fin);
+            layer.appendChild(el);
+        });
+    }
+
+    function applyCharacterPreviewBackground(path, lobbyId = charConfig.bg) {
+        const bgEl = document.getElementById('char-preview-bg');
+        const zone = document.getElementById('char-preview-zone');
+        if (!path) return;
+
+        const meta = BACKGROUND_META?.lobby?.[lobbyId] || {};
+        const baseX = Number.isFinite(Number(meta.focusX)) ? Math.max(0, Math.min(100, Number(meta.focusX))) : 50;
+        const baseY = Number.isFinite(Number(meta.focusY)) ? Math.max(0, Math.min(100, Number(meta.focusY))) : 50;
+        const adj = charScene.backgroundById[lobbyId] || (charScene.backgroundById[lobbyId] = {x:baseX,y:baseY,scale:1});
+        const focusX = Math.max(0,Math.min(100,Number(adj.x)||baseX));
+        const focusY = Math.max(0,Math.min(100,Number(adj.y)||baseY));
+
+        if (bgEl) setSmartImageSrc(bgEl, path);
+        if (zone) {
+            zone.style.setProperty('--char-preview-bg-image', `url("${path}")`);
+            zone.style.setProperty('--bg-focus-x', `${focusX}%`);
+            zone.style.setProperty('--bg-focus-y', `${focusY}%`);
+            zone.style.setProperty('--bg-user-scale', String(Math.max(1, Math.min(1.8, Number(adj.scale)||1))));
+        }
+    }
 
     window.initCharUI = function() {
         const catZone = document.getElementById('char-cat-zone');
         const bgEl = document.getElementById('char-preview-bg');
         const bodyEl = document.getElementById('char-preview-body');
         if(!catZone) return;
-        if (bgEl) setSmartImageSrc(bgEl, backgroundPath('lobby', charConfig.bg));
+        if (!window.__charSceneLoaded) { loadCharScene(); window.__charSceneLoaded = true; }
+        if (bgEl) {
+            const bgPath = backgroundPath('lobby', charConfig.bg);
+            applyCharacterPreviewBackground(bgPath);
+        }
         if (bodyEl) setSmartImageSrc(bodyEl, characterPath(charConfig.body));
+        setupCharacterLoveInteraction();
+        applySceneTransforms(false);
         catZone.innerHTML = '';
         CHAR_CATEGORIES.forEach(cat => {
             const div = document.createElement('div');
@@ -1808,6 +2249,7 @@
         activeCharCategory = catId;
         if (catId === 'bg') { charBgPage = 0; charBgTierFilter = 'ALL'; }
         if (catId === 'body') { charBodyPage = 0; charBodyTierFilter = 'ALL'; }
+        if (catId === 'emoji') { charEmojiPage = 0; charEmojiTierFilter = 'ALL'; }
         const catData = CHAR_CATEGORIES.find(c => c.id === catId);
         document.querySelectorAll('.cat-tab').forEach(el => { el.classList.remove('active'); if(el.innerText === catData.name) el.classList.add('active'); });
         document.getElementById('char-item-title').innerText = catData.name;
@@ -1836,6 +2278,13 @@
         renderCharItems();
         resetCharBgScroll();
     }
+
+    function getFilteredCharEmojiIds() {
+        const all=[...(ITEMS_DB.N||[])];
+        return charEmojiTierFilter==='ALL'||charEmojiTierFilter==='N' ? all : [];
+    }
+    window.setCharEmojiPage=function(page){const all=getFilteredCharEmojiIds();const max=Math.max(0,Math.ceil(all.length/CHAR_EMOJI_PAGE_SIZE)-1);charEmojiPage=Math.max(0,Math.min(max,page));renderCharItems();resetCharBgScroll();};
+    window.setCharEmojiTierFilter=function(tier){charEmojiTierFilter=tier;charEmojiPage=0;renderCharItems();resetCharBgScroll();};
 
     function getFilteredCharBgIds() {
         return Object.keys(BACKGROUND_META.lobby)
@@ -1873,8 +2322,10 @@
         const layout = document.querySelector('.char-custom-layout');
         const isBgLibrary = catData.id === 'bg';
         const isBodyLibrary = catData.id === 'body';
-        const isLargeLibrary = isBgLibrary || isBodyLibrary;
+        const isEmojiLibrary = catData.id === 'emoji';
+        const isLargeLibrary = isBgLibrary || isBodyLibrary || isEmojiLibrary;
         list.classList.toggle('bg-library', isLargeLibrary);
+        list.classList.toggle('emoji-library', isEmojiLibrary);
         if (layout) layout.classList.toggle('bg-library-open', isLargeLibrary);
 
         if (catData.type === 'prep') {
@@ -1933,10 +2384,25 @@
                 const imgSrc = characterPath(id);
                 div.innerHTML = `<div class="char-tier-badge">${tier}</div><img src="${imgSrc}" onerror="handleAssetImageError(this)" onload="handleAssetImageLoad(this)"><div class="bg-image-missing">이미지 없음<br>${String(id+1).padStart(4,'0')}</div>${data.count > 0 ? `<div class="count">${data.count}</div>` : '<div class="lock-mark">🔒</div>'}`;
                 if (data.count > 0) {
-                    div.onclick = () => { charConfig.body = id; setSmartImageSrc(document.getElementById('char-preview-body'), imgSrc); renderCharItems(); };
+                    div.onclick = () => { charConfig.body = id; setSmartImageSrc(document.getElementById('char-preview-body'), imgSrc); applySceneTransforms(false); renderCharItems(); };
                 }
                 list.appendChild(div);
             });
+        } else if (catData.id === 'emoji') {
+            const allIds=getFilteredCharEmojiIds();
+            const totalPages=Math.max(1,Math.ceil(allIds.length/CHAR_EMOJI_PAGE_SIZE));
+            charEmojiPage=Math.max(0,Math.min(totalPages-1,charEmojiPage));
+            const start=charEmojiPage*CHAR_EMOJI_PAGE_SIZE, pageIds=allIds.slice(start,start+CHAR_EMOJI_PAGE_SIZE);
+            const controls=document.createElement('div');controls.className='char-bg-controls';
+            const tierTabs=document.createElement('div');tierTabs.className='char-bg-tier-tabs';
+            ['ALL','N'].forEach(tier=>{const btn=document.createElement('button');btn.className=`char-bg-tier-btn ${charEmojiTierFilter===tier?'active':''}`;btn.innerText=`${tier==='ALL'?'전체':'N'} ${allIds.length}`;btn.onclick=()=>setCharEmojiTierFilter(tier);tierTabs.appendChild(btn);});
+            controls.appendChild(tierTabs);
+            const toolbar=document.createElement('div');toolbar.className='char-bg-toolbar';
+            const rangeStart=allIds.length?start+1:0, rangeEnd=Math.min(start+CHAR_EMOJI_PAGE_SIZE,allIds.length);
+            toolbar.innerHTML=`<button class="char-bg-page-btn" ${charEmojiPage===0?'disabled':''} onclick="setCharEmojiPage(${charEmojiPage-1})">‹</button><div class="char-bg-page-info">N · ${rangeStart}-${rangeEnd} / ${allIds.length} · ${charEmojiPage+1}/${totalPages}</div><button class="char-bg-page-btn" ${charEmojiPage>=totalPages-1?'disabled':''} onclick="setCharEmojiPage(${charEmojiPage+1})">›</button>`;
+            controls.appendChild(toolbar);
+            const clearRow=document.createElement('div');clearRow.style.cssText='grid-column:1/-1;display:flex;justify-content:center;padding:0 0 4px';clearRow.innerHTML=`<button class="char-bg-page-btn" style="width:auto;padding:0 10px;color:#d63031" onclick="clearPlacedEmojis()">🗑 배치 이모지 전체 삭제 (${charScene.emojis.length})</button>`;controls.appendChild(clearRow);list.appendChild(controls);
+            pageIds.forEach(symbol=>{const owned=(itemInventory[symbol]?.count||0)>0;const div=document.createElement('div');div.className=`char-item-btn ${owned?'':'unowned'}`;div.title=`${symbol} · N 등급 · ${owned?'배경에 배치':'미보유'}`;div.innerHTML=`<div class="char-tier-badge">N</div><span>${symbol}</span>${owned?'':'<div class="lock-mark">🔒</div>'}`;if(owned)div.onclick=()=>{if(!charCustomizeMode){toggleCharItemZone(true);enterCharCustomizeMode();} addPlacedEmoji(symbol);};list.appendChild(div);});
         } else if (catData.id === 'bg') {
             // 대량 배경: 티어 필터 + 번호순 + 12개 페이지
             const allIds = getFilteredCharBgIds();
@@ -1985,7 +2451,7 @@
                     img.onerror = () => handleAssetImageError(img);
                     img.onload = () => handleAssetImageLoad(img);
                 }
-                if (owned) div.onclick = () => { charConfig.bg=i; setSmartImageSrc(document.getElementById('char-preview-bg'), imgSrc); renderCharItems(); };
+                if (owned) div.onclick = () => { charConfig.bg=i; applyCharacterPreviewBackground(imgSrc, i); applySceneTransforms(false); renderCharItems(); };
                 list.appendChild(div);
             });
         }
@@ -2327,7 +2793,7 @@
     window.onload = async () => {
         await loadGameAssetData();
         rebuildAssetInventories();
-        document.getElementById('char-preview-bg').src = backgroundPath('lobby', charConfig.bg);
+        applyCharacterPreviewBackground(backgroundPath('lobby', charConfig.bg));
         document.getElementById('char-preview-body').src = characterPath(charConfig.body);
         document.getElementById('battle-stage').style.backgroundImage = `url('${backgroundPath('battle',bgConfig.battle)}')`;
         { const hero=document.getElementById('hero'); if(hero){hero.onerror=function(){this.style.display='none';};hero.style.display='';hero.src=battleCharacterPath(battleCharacter);} }
@@ -2441,33 +2907,66 @@
                 mergeQueue = []; 
             }
             const allBodies = Composite.allBodies(window.world);
-            allBodies.forEach(b => { if (b.position.y > CANVAS_HEIGHT + 200) Composite.remove(window.world, b); });
+            allBodies.forEach(b => {
+                if (b.level !== undefined) {
+                    // 구슬은 물리 터널링/쉐이크 때문에 보드 밖으로 빠져도 삭제하지 않고 복귀시킵니다.
+                    if (b.position.y > CANVAS_HEIGHT + 120 || b.position.x < -90 || b.position.x > CANVAS_WIDTH + 90) {
+                        const safeX = Math.max(20, Math.min(CANVAS_WIDTH - 20, b.position.x));
+                        Matter.Body.setPosition(b, { x: safeX, y: Math.max(20, CANVAS_HEIGHT - 70) });
+                        Matter.Body.setVelocity(b, { x: 0, y: -2 });
+                    } else if (b.position.y < -650) {
+                        Matter.Body.setPosition(b, { x: Math.max(20, Math.min(CANVAS_WIDTH - 20, b.position.x)), y: -25 });
+                        Matter.Body.setVelocity(b, { x: 0, y: 4 });
+                    }
+                } else if (b.position.y > CANVAS_HEIGHT + 200) {
+                    Composite.remove(window.world, b);
+                }
+            });
         });
 
         // 전투 아이템 비용: 골드 100/200/300
         window.useItem = function(itemType) {
             if (isGameOver || globalPause || currentMenu !== 'battle') return; 
-            let cost = (itemType === 'tornado') ? 300 : (itemType === 'hammer' ? 100 : 200);
+            let cost = (itemType === 'tornado') ? 300 : (itemType === 'organize' ? 100 : 200);
             const allBalls = Composite.allBodies(window.world).filter(b => b.level !== undefined);
-            if (itemType === 'hammer' && allBalls.length === 0) { showFloatingText('파괴할 구슬이 없습니다!', 210, 400, '#ff7675'); return; }
+            if (itemType === 'organize' && allBalls.length === 0) { showFloatingText('정리할 구슬이 없습니다!', 210, 400, '#ff7675'); return; }
             if (itemType === 'tornado' && tornadoTicks > 0) { showFloatingText('토네이도가 이미 발동 중입니다!', 210, 400, '#ff7675'); return; }
             if (gold < cost) { showFloatingText(`골드가 부족합니다! 🪙 ${cost}`, 210, 400, "#ff7675"); return; }
             gold -= cost; updateTopUI();
 
-            if (itemType === 'hammer') {
-                const target = allBalls[Math.floor(Math.random() * allBalls.length)];
-                Composite.remove(window.world, target); showFloatingText(`파괴! 🔨`, target.position.x + 20, target.position.y, '#fff');
+            if (itemType === 'organize') {
+                // 정리: 구슬을 삭제하지 않고 중앙/아래 방향으로 잠깐 정돈합니다.
+                // 총 구슬량은 그대로라 장기적으로는 반드시 게임오버 가능성이 유지됩니다.
+                allBalls.forEach((b) => {
+                    const dx = (CANVAS_WIDTH / 2) - b.position.x;
+                    const vx = Math.max(-14, Math.min(14, dx * 0.070));
+                    const vy = Math.max(5.0, Math.min(12, Math.abs(b.velocity.y) + 4.0));
+                    Matter.Body.setVelocity(b, { x: vx, y: vy });
+                    Matter.Body.applyForce(b, b.position, { x: dx * 0.00016 * b.mass, y: 0.0011 * b.mass });
+                    Matter.Body.setAngularVelocity(b, b.angularVelocity * 0.20);
+                });
+                showFloatingText(`강력 정리! 🧲💨`, 210, 400, '#82ccdd');
             } else if (itemType === 'shake') {
                 // BIG SHAKE: 구슬을 실제로 위쪽 배경 밖까지 크게 발사한 뒤 중력으로 다시 떨어뜨립니다.
                 // 아래쪽으로 삭제되는 조건(y > CANVAS_HEIGHT + 200)은 건드리지 않으며, 위쪽에는 충분한 천장 여유가 있습니다.
-                allBalls.forEach((b, index) => {
-                    const vx = (Math.random() - 0.5) * 21;       // 더 넓은 좌우 확산
-                    const vy = -(28 + Math.random() * 12);      // V7: 이전보다 훨씬 높게 솟았다가 다시 낙하
+                allBalls.forEach((b) => {
+                    const vx = (Math.random() - 0.5) * 16;
+                    const vy = -(24 + Math.random() * 9);
                     Matter.Body.setVelocity(b, { x: vx, y: vy });
-                    Matter.Body.setAngularVelocity(b, (Math.random() - 0.5) * 0.45);
-                    // 한 점에서만 튀지 않도록 약간의 추가 좌우 힘
-                    Matter.Body.applyForce(b, b.position, { x: (Math.random()-0.5) * 0.005 * b.mass, y: -0.002 * b.mass });
+                    Matter.Body.setAngularVelocity(b, (Math.random() - 0.5) * 0.38);
+                    Matter.Body.applyForce(b, b.position, { x: (Math.random()-0.5) * 0.0035 * b.mass, y: -0.0015 * b.mass });
                 });
+                // 쉐이크 후 화면 밖에 오래 남는 구슬을 반드시 보드로 복귀시킵니다.
+                setTimeout(() => {
+                    if (!window.world) return;
+                    Composite.allBodies(window.world).filter(b => b.level !== undefined).forEach((b) => {
+                        const safeX = Math.max(18, Math.min(CANVAS_WIDTH - 18, b.position.x));
+                        if (b.position.y < -70 || b.position.x < -35 || b.position.x > CANVAS_WIDTH + 35) {
+                            Matter.Body.setPosition(b, { x: safeX, y: -20 - Math.random() * 30 });
+                            Matter.Body.setVelocity(b, { x: 0, y: 4 + Math.random() * 2 });
+                        }
+                    });
+                }, 1250);
                 showFloatingText(`SUPER SHAKE! 🌪️⬆️`, 210, 400, '#f6e58d');
                 invincibleEndTime = Date.now() + 7000;
                 isWarning = false;
