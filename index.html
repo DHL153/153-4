@@ -700,10 +700,21 @@
 .setting-action { border:1px solid #dcd2e8; border-radius:10px; background:#faf7ff; color:#6c5ce7; padding:7px 10px; font-size:10px; font-weight:1000; cursor:pointer; }
 .setting-action.danger { color:#d63031; border-color:#fab1a0; background:#fff5f5; }
 .setting-support { display:inline-block; margin-left:5px; font-size:8px; color:#95a5a6; font-weight:700; }
-.test-unlock-btn{border:2px solid #fdcb6e;background:#fff8dc;color:#8a6d00;border-radius:10px;padding:6px 9px;font-size:10px;font-weight:1000;cursor:pointer;white-space:nowrap;box-shadow:0 2px 0 #fdcb6e;transition:.12s;}
-.test-unlock-btn.active{background:#1dd1a1;border-color:#10ac84;color:#fff;box-shadow:0 2px 0 #10ac84;}
-.test-unlock-btn:active{transform:translateY(2px);box-shadow:none;}
-@media(max-width:520px){.test-unlock-btn{font-size:9px;padding:5px 6px;} #top-bar{padding-left:8px!important;padding-right:8px!important;gap:4px!important;}}
+.test-unlock-btn{
+    border:1px solid #fdcb6e;background:#fff8dc;color:#8a6d00;border-radius:6px;
+    padding:2px 4px;font-size:7px;line-height:1.05;font-weight:1000;cursor:pointer;
+    white-space:nowrap;box-shadow:none;transition:.12s;opacity:.82;letter-spacing:-.3px;
+}
+.test-unlock-btn.active{background:#1dd1a1;border-color:#10ac84;color:#fff;opacity:1;}
+.test-unlock-btn:active{transform:scale(.96);}
+#top-bar .stat-badge.piece{padding-left:7px;padding-right:7px;background:#fff9e8;border-color:#f1d48a;color:#8a6100;}
+@media(max-width:520px){
+    .test-unlock-btn{font-size:6.5px;padding:2px 3px;border-radius:5px;}
+    #top-bar{padding-left:6px!important;padding-right:6px!important;gap:3px!important;}
+    #top-bar .top-stats{gap:3px!important;}
+    #top-bar .stat-badge{padding:5px 6px;font-size:11px;}
+    #top-bar .stat-badge.piece{padding-left:5px;padding-right:5px;}
+}
 </style>
 </head>
 <body>
@@ -711,8 +722,9 @@
 <!-- 💡 상단 바 (에너지 완전 삭제, 타이머 복구) -->
 <div id="top-bar">
 <div class="stat-badge timer" id="top-gacha-timer">뽑기 ⏳ 30:00</div>
-<button id="btn-test-unlock-all" class="test-unlock-btn" type="button" onclick="toggleTestUnlockAll()" title="테스트용: 모든 수집 리소스 보유 상태를 임시로 전환">🔒 전체 해금: OFF</button>
+<button id="btn-test-unlock-all" class="test-unlock-btn" type="button" onclick="toggleTestUnlockAll()" title="테스트용: 모든 수집 리소스 보유 상태를 임시로 전환">🔒 전체해금 OFF</button>
 <div class="top-stats"><div class="stat-badge score">🏆 SCORE <span id="val-score">0</span></div>
+<div class="stat-badge piece" title="컬렉션 조각">🧩 <span id="val-fragments">0</span></div>
 <div class="stat-badge merge">🔄 <span id="val-merge">0</span></div>
 <div class="stat-badge gold">🪙 <span id="val-gold">1K</span></div>
 </div>
@@ -777,8 +789,8 @@
 </div>
 
 <div class="panel" style="margin:0 15px 18px 15px; background:#fffdf7;">
-<div class="panel-title"><span>🧩 통합 파편 · 분해</span><span style="font-size:10px;color:#999;font-weight:normal;">파편은 Steam 거래 불가</span></div>
-<div class="economy-balance"><span>보유 통합 파편</span><strong>🧩 <span id="fragment-balance">0</span></strong></div>
+<div class="panel-title"><span>🧩 컬렉션 조각 · 분해</span><span style="font-size:10px;color:#999;font-weight:normal;">조각은 Steam 거래 불가</span></div>
+<div class="economy-balance"><span>보유 컬렉션 조각</span><strong>🧩 <span id="fragment-balance">0</span></strong></div>
 <div class="economy-tabs" id="disassemble-tier-tabs"></div>
 <div style="display:flex; gap:8px; margin-bottom:9px;">
 <button class="action-btn-sub" style="flex:1;" onclick="disassembleAllDuplicates()">🧹 중복 전체 분해</button>
@@ -788,11 +800,11 @@
 </div>
 
 <div class="panel" style="margin:0 15px 30px 15px; background:#f8f5ff;">
-<div class="panel-title"><span>🎫 등급 선택권 상점</span><span style="font-size:10px;color:#999;font-weight:normal;">원하는 아이템 확정 획득</span></div>
+<div class="panel-title"><span>🎫 조각 선택권 상점</span><span style="font-size:10px;color:#999;font-weight:normal;">원하는 아이템 확정 획득</span></div>
 <div class="economy-tabs" id="selector-tier-tabs"></div>
-<div class="economy-balance"><span id="selector-cost-label">N 선택권</span><strong>🧩 <span id="selector-cost">20</span></strong></div>
+<div class="economy-balance"><span id="selector-cost-label">N 조각 선택권</span><strong>🧩 <span id="selector-cost">20</span></strong></div>
 <div class="economy-grid" id="selector-grid"></div>
-<div class="shop-help-note">선택권 가격: N 20 · R 100 · SR 600 · SSR 3.5K · UR 30K. 이미 보유한 아이템도 선택 가능하며 중복으로 획득됩니다.</div>
+<div class="shop-help-note">조각 선택권 가격: N 20 · R 100 · SR 600 · SSR 3.5K · UR 30K. 이미 보유한 아이템도 선택 가능하며 중복으로 획득됩니다.</div>
 </div>
 </div>
 <!-- 💡 뷰 2: 전투 & 머지 화면 -->
@@ -1094,7 +1106,9 @@
         updateGachaUI(); // 상태 변경 시 버튼 상태 업데이트
         if (typeof updateMergePackUI === 'function') updateMergePackUI();
         if (typeof updateMiniHud === 'function') updateMiniHud();
-    }
+            const fragmentEl=document.getElementById('val-fragments');
+        if(fragmentEl) fragmentEl.innerText=formatCompactNumber(fragments);
+}
 
 
 
@@ -1276,7 +1290,7 @@
         gameSettings[key]=value; saveGameSettings(); applyGameSettings();
     };
     window.resetAllLocalData=function(){
-        if(!confirm('설정, 플레이 기록, 수집 아이템, 통합 파편, 일일 보상 기록을 모두 초기화할까요?'))return;
+        if(!confirm('설정, 플레이 기록, 수집 아이템, 컬렉션 조각, 일일 보상 기록을 모두 초기화할까요?'))return;
         ['mergeRoll.settings.v7','mergeRoll.settings.v8','mergeRoll.localLeaderboard.v7','mergeRoll.localLeaderboard.v8','mergeRoll.mergePackDaily.v1','mergeRoll.economy.v1'].forEach(k=>localStorage.removeItem(k));
         location.reload();
     };
@@ -2151,7 +2165,7 @@
         const btn = document.getElementById('btn-test-unlock-all');
         if (!btn) return;
         btn.classList.toggle('active', testUnlockAll);
-        btn.innerText = testUnlockAll ? '🔓 전체 해금: ON' : '🔒 전체 해금: OFF';
+        btn.innerText = testUnlockAll ? '🔓 전체해금 ON' : '🔒 전체해금 OFF';
     }
     window.toggleTestUnlockAll = function() {
         if (!charInventory || !Object.keys(charInventory).length) {
@@ -2445,7 +2459,7 @@
         document.getElementById('event-overlay').style.display = 'flex'; resultEl.style.display = 'flex';
     }
 
-    // ================= [ 통합 파편 / 분해 / 선택권 ] =================
+    // ================= [ 컬렉션 조각 / 분해 / 조각 선택권 ] =================
     let activeDisassembleTier='N';
     let activeSelectorTier='N';
 
@@ -2499,7 +2513,7 @@
 
     window.buySelectorItem=function(category,id,tier){
         const cost=SELECTOR_COSTS[tier];
-        if(fragments<cost){ showFloatingText(`파편이 부족합니다! 🧩 ${cost.toLocaleString()}`,210,330,'#ff7675'); return; }
+        if(fragments<cost){ showFloatingText(`컬렉션 조각이 부족합니다! 🧩 ${cost.toLocaleString()}`,210,330,'#ff7675'); return; }
         const inv=getInventoryRef(category);
         if(!inv?.[id]) return;
         const before=calculateCollectionPower();
@@ -2507,7 +2521,7 @@
         const powerText=after.multiplier>before.multiplier
             ? `\\nCollection Power ×${before.multiplier.toFixed(2)} → ×${after.multiplier.toFixed(2)} (+${(after.multiplier-before.multiplier).toFixed(2)})`
             : '\\n이미 보유 중이므로 Collection Power 변화 없음 (중복 획득)';
-        if(!confirm(`${tier} 선택권\\n🧩 ${cost.toLocaleString()} 파편을 사용해 이 아이템을 확정 획득할까요?${powerText}`)) return;
+        if(!confirm(`${tier} 조각 선택권\\n🧩 ${cost.toLocaleString()} 조각을 사용해 이 아이템을 확정 획득할까요?${powerText}`)) return;
         fragments-=cost;
         inv[id].count++;
         saveEconomyState(); updateAllUIs();
@@ -2516,6 +2530,7 @@
 
     function renderShardEconomyUI(){
         const bal=document.getElementById('fragment-balance'); if(bal) bal.innerText=formatCompactNumber(fragments);
+        const topPiece=document.getElementById('val-fragments'); if(topPiece) topPiece.innerText=formatCompactNumber(fragments);
 
         const dTabs=document.getElementById('disassemble-tier-tabs');
         if(dTabs) dTabs.innerHTML=TIER_ORDER.map(t=>`<button class="economy-tab ${activeDisassembleTier===t?'active':''}" onclick="setDisassembleTier('${t}')">${t} · 🧩${formatCompactNumber(FRAGMENT_VALUES[t])}</button>`).join('');
@@ -2529,7 +2544,7 @@
                 const div=document.createElement('div');
                 div.className='economy-item';
                 div.innerHTML=renderEconomyItemHtml(x)+`<div class="small-count">×${count}</div>`+(count===1?'<div class="power-risk">POWER↓</div>':'');
-                div.title=`${collectibleLabel(x.category)} · ${x.tier} · 분해 ${FRAGMENT_VALUES[x.tier]} 파편`;
+                div.title=`${collectibleLabel(x.category)} · ${x.tier} · 분해 ${FRAGMENT_VALUES[x.tier]} 조각`;
                 div.onclick=()=>disassembleOne(x.category,x.id);
                 dGrid.appendChild(div);
             });
@@ -2540,7 +2555,7 @@
         if(sTabs) sTabs.innerHTML=TIER_ORDER.map(t=>`<button class="economy-tab ${activeSelectorTier===t?'active':''}" onclick="setSelectorTier('${t}')">${t}</button>`).join('');
         const cost=SELECTOR_COSTS[activeSelectorTier];
         const costEl=document.getElementById('selector-cost'); if(costEl) costEl.innerText=formatCompactNumber(cost);
-        const costLabel=document.getElementById('selector-cost-label'); if(costLabel) costLabel.innerText=`${activeSelectorTier} 선택권`;
+        const costLabel=document.getElementById('selector-cost-label'); if(costLabel) costLabel.innerText=`${activeSelectorTier} 조각 선택권`;
 
         const sGrid=document.getElementById('selector-grid');
         if(sGrid) {
@@ -2551,7 +2566,7 @@
                 const div=document.createElement('div');
                 div.className='economy-item';
                 div.innerHTML=renderEconomyItemHtml(x)+`<div class="small-count">${owned?'보유':'미보유'}</div>`+(!owned?'<div class="new-power">POWER↑</div>':'');
-                div.title=`${activeSelectorTier} 선택권 · ${cost.toLocaleString()} 파편`;
+                div.title=`${activeSelectorTier} 조각 선택권 · ${cost.toLocaleString()} 조각`;
                 div.onclick=()=>buySelectorItem(x.category,x.id,activeSelectorTier);
                 sGrid.appendChild(div);
             });
