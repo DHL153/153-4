@@ -60,6 +60,30 @@
         .btn-gacha .title { font-size: 22px; font-weight: 900; color: #d35400; }
         .btn-gacha .cost-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
         .btn-gacha .cost { font-size: 14px; font-weight: bold; padding: 6px 12px; border-radius: 8px; display:flex; align-items:center; gap:4px; background: #fdfbf7; border: 1px solid #e8dff5;}
+        .btn-gacha.daily-free { border-color:#55efc4; box-shadow:0 6px 0 #00b894; position:relative; }
+        .btn-gacha.daily-free .title { color:#00896b; }
+        .free-badge { position:absolute; top:-10px; right:-8px; background:#ff4757; color:#fff; border:2px solid #fff; border-radius:999px; padding:4px 9px; font-size:10px; font-weight:1000; box-shadow:0 3px 8px rgba(0,0,0,.18); animation:pulse .65s infinite alternate; }
+        .economy-balance { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; margin-bottom:10px; border-radius:11px; background:#fff8e8; border:1px solid #ffe3a3; color:#6d4c19; font-weight:900; font-size:12px; }
+        .economy-balance strong { font-size:18px; color:#e67e22; }
+        .economy-tabs { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:8px 0 10px; }
+        .economy-tabs::-webkit-scrollbar { display:none; }
+        .economy-tab { flex:0 0 auto; border:1px solid #ddcfed; background:#fff; color:#6a4c9c; border-radius:999px; padding:6px 10px; font-size:10px; font-weight:900; cursor:pointer; }
+        .economy-tab.active { background:#6a4c9c; color:#fff; border-color:#6a4c9c; }
+        .economy-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; max-height:270px; overflow:auto; padding:3px; }
+        .economy-item { min-width:0; min-height:64px; border:1px solid #eadff5; border-radius:10px; background:#fff; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; cursor:pointer; overflow:hidden; }
+        .economy-item:hover { border-color:#a98bd0; }
+        .economy-item .small-count { font-size:9px; font-weight:1000; color:#6a4c9c; }
+        .economy-item .power-risk { position:absolute; left:3px; bottom:3px; font-size:8px; background:#fff0f0; color:#d63031; border-radius:5px; padding:1px 3px; font-weight:900; }
+        .economy-item .new-power { position:absolute; left:3px; bottom:3px; font-size:8px; background:#eafff7; color:#00896b; border-radius:5px; padding:1px 3px; font-weight:900; }
+        .shop-help-note { font-size:10px; line-height:1.45; color:#75638e; background:#faf7ff; border:1px solid #eadff5; border-radius:10px; padding:9px; margin-top:9px; }
+        .collection-power-card { margin-bottom:12px; padding:12px; border-radius:14px; background:linear-gradient(135deg,#6c5ce7,#8e7dff); color:#fff; box-shadow:0 6px 18px rgba(108,92,231,.20); }
+        .collection-power-card .power-main { display:flex; justify-content:space-between; align-items:flex-end; gap:8px; }
+        .collection-power-card .power-label { font-size:10px; font-weight:900; opacity:.85; letter-spacing:.5px; }
+        .collection-power-card .power-value { font-size:25px; font-weight:1000; }
+        .collection-power-card .power-sub { margin-top:7px; font-size:10px; line-height:1.45; opacity:.95; }
+        .power-tier-row { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:9px; }
+        .power-tier-cell { background:rgba(255,255,255,.13); border-radius:7px; padding:5px 2px; text-align:center; font-size:8px; font-weight:900; }
+        .power-change-preview { margin:8px 0; border-radius:10px; padding:9px; background:#fff7f7; border:1px solid #ffc9c9; color:#b33939; font-size:11px; line-height:1.5; font-weight:800; }
 
         /* 통합 합성소 패널 */
         .panel { background: #fff; border: 2px solid #e8dff5; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -293,15 +317,43 @@
         
         /* ================= 캐릭터 감상/꾸미기 모드 ================= */
         #char-emoji-layer { position:absolute; inset:0; z-index:4; pointer-events:none; }
-        .placed-emoji { position:absolute; left:var(--emoji-x); top:var(--emoji-y); transform:translate(-50%,-50%); font-size:clamp(24px,7vw,42px); line-height:1; user-select:none; touch-action:none; filter:drop-shadow(0 2px 3px rgba(0,0,0,.18)); }
-        .char-custom-layout.char-editing .placed-emoji { pointer-events:auto; cursor:grab; outline:1px dashed rgba(255,255,255,.42); border-radius:10px; padding:3px; }
-        .char-custom-layout.char-editing .placed-emoji.dragging { cursor:grabbing; outline:2px solid rgba(255,255,255,.9); }
+        .placed-emoji {
+            position:absolute;
+            left:var(--emoji-x); top:var(--emoji-y);
+            transform:translate(-50%,-50%) scale(var(--emoji-scale,1)) rotate(var(--emoji-rotate,0deg)) scaleX(var(--emoji-flip,1));
+            font-size:clamp(24px,7vw,42px); line-height:1;
+            user-select:none; touch-action:none;
+            filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));
+            transform-origin:center center;
+        }
+        .char-custom-layout.char-editing .placed-emoji {
+            pointer-events:auto; cursor:grab;
+            outline:1px dashed rgba(255,255,255,.42);
+            outline-offset:3px; border-radius:10px; padding:3px;
+        }
+        .char-custom-layout.char-editing .placed-emoji.selected {
+            outline:2px dashed #ff6b9a;
+            outline-offset:4px;
+            filter:drop-shadow(0 2px 3px rgba(0,0,0,.18)) drop-shadow(0 0 6px rgba(255,107,154,.55));
+        }
+        .char-custom-layout.char-editing .placed-emoji.dragging {
+            cursor:grabbing; outline:2px solid rgba(255,255,255,.95);
+        }
         #char-customize-btn { display:none; position:absolute; right:14px; bottom:16px; z-index:12; border:1px solid rgba(255,255,255,.72); border-radius:999px; background:rgba(34,25,48,.58); color:#fff; backdrop-filter:blur(8px); padding:8px 13px; font-size:12px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.18); }
         .char-custom-layout.char-panel-closed:not(.char-editing) #char-customize-btn { display:block; }
         #char-customize-topbar { display:none; position:absolute; z-index:15; left:10px; right:10px; top:10px; height:36px; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; border-radius:12px; background:rgba(30,24,40,.62); backdrop-filter:blur(9px); color:white; }
         #char-customize-topbar button { border:0; border-radius:9px; padding:6px 10px; font-size:11px; font-weight:900; background:rgba(255,255,255,.18); color:#fff; }
         #char-customize-topbar button.primary { background:#ff477e; }
         #char-customize-toolbar { display:none; position:absolute; z-index:15; left:10px; right:10px; bottom:12px; border-radius:14px; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); padding:8px; box-shadow:0 5px 22px rgba(45,28,65,.22); }
+        #char-customize-category-notice {
+            display:none; position:absolute; z-index:18; top:10px; left:10px; right:10px;
+            padding:8px 10px; border-radius:12px;
+            background:rgba(62,48,82,.88); color:#fff;
+            font-size:10px; font-weight:900; line-height:1.35; text-align:center;
+            box-shadow:0 4px 14px rgba(0,0,0,.2); backdrop-filter:blur(8px);
+            pointer-events:none;
+        }
+        .char-custom-layout.char-editing:not(.char-panel-closed) #char-customize-category-notice { display:block; }
         .char-custom-layout.char-editing.char-panel-closed #char-customize-topbar, .char-custom-layout.char-editing.char-panel-closed #char-customize-toolbar { display:flex; }
         .char-custom-layout.char-editing #char-customize-toolbar { flex-direction:column; gap:7px; }
         .char-edit-targets, .char-edit-controls, .char-emoji-actions { display:flex; gap:5px; align-items:center; justify-content:center; flex-wrap:wrap; }
@@ -310,8 +362,19 @@
         .char-edit-controls span { min-width:30px; text-align:center; color:#75638e; font-size:10px; font-weight:900; }
         .char-emoji-actions button.danger { color:#d63031; border-color:#f3c4c4; background:#fff8f8; }
         #char-edit-background-controls { display:none; }
+        #char-edit-emoji-controls { display:none; }
         .char-custom-layout.edit-target-background #char-edit-character-controls { display:none; }
         .char-custom-layout.edit-target-background #char-edit-background-controls { display:flex; }
+        .char-custom-layout.edit-target-emoji #char-edit-character-controls,
+        .char-custom-layout.edit-target-emoji #char-edit-background-controls { display:none; }
+        .char-custom-layout.edit-target-emoji #char-edit-emoji-controls { display:flex; }
+        #char-edit-emoji-controls .danger { color:#d63031; border-color:#f3c4c4; background:#fff8f8; }
+        #char-edit-emoji-controls.no-selection { opacity:.5; }
+        #char-edit-emoji-controls.no-selection button { pointer-events:none; }
+        #char-edit-emoji-controls.no-selection::before {
+            content:'배치된 이모지를 선택하세요';
+            width:100%; text-align:center; color:#8a7a9d; font-size:10px; font-weight:900;
+        }
         .char-custom-layout.char-editing #char-preview-body { cursor:grab; }
         .char-custom-layout.char-editing.edit-target-background #char-preview-body { pointer-events:none; opacity:.92; }
         .char-custom-layout.char-editing.edit-target-background #char-preview-bg { cursor:grab; }
@@ -390,6 +453,12 @@
         .collection-tabs::-webkit-scrollbar { display:none; }
         .collection-tab { flex:0 0 auto; border:2px solid #e8dff5; background:#fff; color:#6a4c9c; border-radius:999px; padding:8px 11px; font-size:11px; font-weight:900; cursor:pointer; }
         .collection-tab.active { background:#6a4c9c; color:#fff; border-color:#6a4c9c; }
+        .owned-only-toggle { flex:0 0 auto; border:1px solid #d8c9eb; background:#fff; color:#6a4c9c; border-radius:999px; padding:6px 10px; min-height:30px; font-size:10px; font-weight:1000; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:4px; box-shadow:0 2px 5px rgba(75,50,115,.06); }
+        .owned-only-toggle.active { background:#1dd1a1; border-color:#10ac84; color:#fff; box-shadow:0 3px 8px rgba(16,172,132,.18); }
+        .owned-only-toggle .check { font-size:11px; }
+        .owned-only-empty { grid-column:1/-1; padding:28px 12px; text-align:center; color:#9a8bac; font-size:11px; font-weight:900; line-height:1.55; }
+        .collection-filter-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:-4px 0 10px; min-width:0; }
+        .collection-filter-hint { font-size:9px; color:#9a8bac; font-weight:800; line-height:1.25; }
         .collection-summary { font-size:12px; font-weight:800; color:#6a4c9c; background:#f7f2ff; border:1px solid #e8dff5; border-radius:10px; padding:9px 10px; margin-bottom:12px; }
         .inv-item .lock-mark { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:18px; pointer-events:none; }
 
@@ -433,9 +502,54 @@
         .nav-item .icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.2s; filter: grayscale(1); opacity: 0.6; }
         .nav-item.active { color: #d81b60; }
         .nav-item.active .icon { transform: translateY(-4px) scale(1.1); filter: grayscale(0); opacity: 1; }
+        /* 하단 5탭: 모바일에서도 라벨이 겹치지 않도록 최소 폭/자간을 안정화 */
+        #bottom-nav .nav-item { min-width:0; letter-spacing:-0.2px; }
+        #bottom-nav .nav-item > div:last-child { white-space:nowrap; }
 
         .floating-text { position: absolute; font-weight: bold; font-size: 20px; color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; pointer-events: none; z-index: 5000; animation: floatUp 1s forwards ease-out; white-space: nowrap; text-align: center; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.3); } }
+
+        #record-break-banner {
+            display:none; position:absolute; z-index:4200; top:92px; left:50%;
+            transform:translateX(-50%); width:min(88%,340px);
+            padding:10px 12px; border-radius:14px;
+            background:linear-gradient(135deg,rgba(66,40,120,.96),rgba(216,27,96,.95));
+            border:2px solid rgba(255,234,167,.95); color:#fff;
+            text-align:center; box-shadow:0 8px 26px rgba(43,22,72,.38);
+            pointer-events:none; overflow:hidden;
+        }
+        #record-break-banner.show { display:block; animation:recordBannerIn 2.4s ease forwards; }
+        #record-break-banner .rb-kicker { font-size:9px; font-weight:1000; letter-spacing:1.2px; color:#ffeaa7; }
+        #record-break-banner .rb-title { font-size:16px; font-weight:1000; margin-top:2px; }
+        #record-break-banner .rb-score { font-size:22px; font-weight:1000; margin-top:2px; text-shadow:0 0 10px rgba(255,234,167,.75); }
+        @keyframes recordBannerIn {
+            0%{opacity:0; transform:translate(-50%,-14px) scale(.92)}
+            12%{opacity:1; transform:translate(-50%,0) scale(1.04)}
+            25%,78%{opacity:1; transform:translate(-50%,0) scale(1)}
+            100%{opacity:0; transform:translate(-50%,-12px) scale(.98)}
+        }
+
+        #overlay-gameover.record-celebration {
+            background:radial-gradient(circle at 50% 35%,rgba(108,92,231,.72),rgba(20,14,34,.96) 58%,rgba(0,0,0,.98));
+        }
+        #overlay-gameover.record-celebration::before {
+            content:"✦  ✨  ★  ✨  ✦"; position:absolute; top:8%; left:50%;
+            transform:translateX(-50%); color:#ffeaa7; font-size:22px;
+            letter-spacing:9px; animation:recordSparkle 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes recordSparkle { from{opacity:.45;transform:translateX(-50%) scale(.92)} to{opacity:1;transform:translateX(-50%) scale(1.08)} }
+        #go-record-title { display:none; font-size:13px; font-weight:1000; color:#ffeaa7; letter-spacing:1.4px; margin-bottom:5px; }
+        #go-record-badges { display:none; flex-wrap:wrap; justify-content:center; gap:6px; margin:8px 16px 10px; }
+        .go-record-badge {
+            padding:5px 9px; border-radius:999px; background:linear-gradient(135deg,#ffeaa7,#fdcb6e);
+            color:#5b3b00; border:1px solid #fff4bf; font-size:10px; font-weight:1000;
+            box-shadow:0 3px 10px rgba(253,203,110,.28);
+        }
+        #overlay-gameover.record-celebration #go-record-title,
+        #overlay-gameover.record-celebration #go-record-badges { display:flex; }
+        #overlay-gameover.record-celebration #go-gameover-title { color:#ffeaa7 !important; text-shadow:0 0 16px rgba(255,234,167,.55); }
+        #overlay-gameover.record-celebration #go-icon { animation:recordTrophyPop .85s cubic-bezier(.2,.8,.2,1) infinite alternate; }
+        @keyframes recordTrophyPop { from{transform:scale(1) rotate(-2deg)} to{transform:scale(1.12) rotate(2deg)} }
 
         /* ================= [ 오버레이 공통 & 가챠 팝업 ] ================= */
         .overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0, 0, 0, 0.85); color: #fff; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 4500; display: none; backdrop-filter: blur(5px); }
@@ -484,8 +598,9 @@
 .collection-page, .menu-page { display:none !important; flex:1; min-height:0; width:100%; }
 .collection-page.active, .menu-page.active { display:flex !important; }
 
-/* leaderboard */
+/* personal records */
 .leaderboard-wrap { padding:14px; overflow:auto; flex:1; }
+.record-page-wrap { padding:14px; overflow:auto; flex:1; width:100%; }
 .score-hero-card { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border-radius:18px; padding:16px; box-shadow:0 7px 18px rgba(108,92,231,.25); margin-bottom:12px; }
 .score-hero-label { font-size:11px; opacity:.88; font-weight:800; }
 .score-hero-value { font-size:32px; font-weight:1000; margin:3px 0; letter-spacing:-1px; }
@@ -570,7 +685,7 @@
   .nav-item .icon { font-size:20px; }
   .subnav-row { padding:7px 6px; }
   .subnav-btn { padding:7px 9px; }
-  .settings-wrap, .leaderboard-wrap { padding:10px; }
+  .settings-wrap, .leaderboard-wrap, .record-page-wrap { padding:10px; }
   .setting-row { align-items:flex-start; }
   .setting-control { max-width:46%; }
   body.mini-window #app { width:100vw; max-width:none; height:100dvh; border:0; border-radius:0; }
@@ -595,7 +710,7 @@
 <div id="app">
 <!-- 💡 상단 바 (에너지 완전 삭제, 타이머 복구) -->
 <div id="top-bar">
-<div class="stat-badge timer" id="top-gacha-timer">뽑기 ⏳ 10s</div>
+<div class="stat-badge timer" id="top-gacha-timer">뽑기 ⏳ 30:00</div>
 <button id="btn-test-unlock-all" class="test-unlock-btn" type="button" onclick="toggleTestUnlockAll()" title="테스트용: 모든 수집 리소스 보유 상태를 임시로 전환">🔒 전체 해금: OFF</button>
 <div class="top-stats"><div class="stat-badge score">🏆 SCORE <span id="val-score">0</span></div>
 <div class="stat-badge merge">🔄 <span id="val-merge">0</span></div>
@@ -610,18 +725,23 @@
 <h1>럭키 통합 상점! 🎉</h1>
 <div style="font-size:13px; margin-bottom:10px;">스킨, 캐릭터, 배경, 아이템이 쏟아집니다!</div>
 <div class="shop-rates">
-<span class="c">N: 90%</span> <span class="b">R: 9.5%</span> <span class="a">SR: 0.49%</span> <span class="s">SSR: 0.49%</span> <span class="ss">UR: 0.0002%</span>
+<span class="c">N: 75%</span> <span class="b">R: 15%</span> <span class="a">SR: 8%</span> <span class="s">SSR: 1.999%</span> <span class="ss">UR: 0.001%</span>
 </div>
-<div style="font-size:10px; opacity:.85; margin-top:6px;">※ 입력 확률 합계가 100%를 초과하여 동일 비율 가중치로 정규화 추첨</div>
+<div style="font-size:10px; opacity:.85; margin-top:6px;">※ 확률 합계 100% · SSR/UR 획득 시 특수 연출</div>
 </div>
 <div class="gacha-btn-container">
-<!-- 💡 단일 뽑기 버튼 (골드100, 머지50, 타이머10초) -->
+<button class="btn-gacha daily-free" id="btn-daily-free" onclick="claimDailyFreeDraw()">
+<div class="free-badge" id="daily-free-badge">FREE</div>
+<div class="title">🎁 오늘의 무료 뽑기</div>
+<div class="cost-row"><div class="cost"><span id="daily-free-status" style="color:#00896b;">오늘 1회 무료</span></div></div>
+</button>
+<!-- 일반 뽑기: 게임이 실행 중일 때 30분마다 1회 충전 -->
 <button class="btn-gacha" id="btn-pull-gacha" onclick="pullGacha(1)">
 <div class="title">🎁 통합 1회 뽑기</div>
 <div class="cost-row">
 <div class="cost"><span style="color:#d35400;">🪙 100</span></div>
 <div class="cost"><span style="color:#6a4c9c;">🔄 50</span></div>
-<div class="cost"><span id="gacha-timer-display" style="color:#27ae60;">⏳ 10s</span></div>
+<div class="cost"><span id="gacha-timer-display" style="color:#27ae60;">⏳ 30:00</span></div>
 </div>
 </button>
 <button class="btn-gacha" id="btn-test-gacha" onclick="grantTestItems(10)" style="border-color:#74b9ff; box-shadow:0 6px 0 #0984e3;">
@@ -651,9 +771,28 @@
 </div>
 </div>
 <!-- 통합 합성 가능 인벤토리 -->
-<div class="panel" style="margin: 0 15px 30px 15px;">
-<div class="panel-title">합성 가능 목록 <span style="font-size:11px; font-weight:normal; color:#999;">여유분 2개 이상만 표시</span></div>
+<div class="panel" style="margin: 0 15px 18px 15px;">
+<div class="panel-title">합성 아이템 선택 <span style="font-size:11px; font-weight:normal; color:#999;">중복 우선 · 마지막 1개도 수동 선택 가능</span></div>
 <div class="inventory-grid" id="global-inventory-grid"></div>
+</div>
+
+<div class="panel" style="margin:0 15px 18px 15px; background:#fffdf7;">
+<div class="panel-title"><span>🧩 통합 파편 · 분해</span><span style="font-size:10px;color:#999;font-weight:normal;">파편은 Steam 거래 불가</span></div>
+<div class="economy-balance"><span>보유 통합 파편</span><strong>🧩 <span id="fragment-balance">0</span></strong></div>
+<div class="economy-tabs" id="disassemble-tier-tabs"></div>
+<div style="display:flex; gap:8px; margin-bottom:9px;">
+<button class="action-btn-sub" style="flex:1;" onclick="disassembleAllDuplicates()">🧹 중복 전체 분해</button>
+</div>
+<div class="economy-grid" id="disassemble-grid"></div>
+<div class="shop-help-note">중복은 Collection Power에 추가 적용되지 않습니다. <b>마지막 1개</b>를 분해하면 해당 수집품이 빠지면서 SCORE Power가 감소하므로 확인창에서 전/후 배율을 보여줍니다.</div>
+</div>
+
+<div class="panel" style="margin:0 15px 30px 15px; background:#f8f5ff;">
+<div class="panel-title"><span>🎫 등급 선택권 상점</span><span style="font-size:10px;color:#999;font-weight:normal;">원하는 아이템 확정 획득</span></div>
+<div class="economy-tabs" id="selector-tier-tabs"></div>
+<div class="economy-balance"><span id="selector-cost-label">N 선택권</span><strong>🧩 <span id="selector-cost">20</span></strong></div>
+<div class="economy-grid" id="selector-grid"></div>
+<div class="shop-help-note">선택권 가격: N 20 · R 100 · SR 600 · SSR 3.5K · UR 30K. 이미 보유한 아이템도 선택 가능하며 중복으로 획득됩니다.</div>
 </div>
 </div>
 <!-- 💡 뷰 2: 전투 & 머지 화면 -->
@@ -663,7 +802,7 @@
   <div class="mini-stat">🔄 <span id="mini-merge">0</span></div>
   <div class="mini-stat">🪙 <span id="mini-gold">1K</span></div>
   <div class="mini-spacer"></div>
-  <div class="mini-stat" id="mini-gacha">🎁 10s</div>
+  <div class="mini-stat" id="mini-gacha">🎁 30:00</div>
   <button class="mini-exit-btn" onclick="setMiniMode(false)" aria-label="미니 모드 종료">↗</button>
 </div>
 <div id="board-section">
@@ -728,21 +867,28 @@
 <button class="subnav-btn active" data-page="character" onclick="switchCollectionPage('character')">🐾 캐릭터</button>
 <button class="subnav-btn" data-page="skin" onclick="switchCollectionPage('skin')">🔮 구슬 스킨</button>
 <button class="subnav-btn" data-page="bg" onclick="switchCollectionPage('bg')">🖼️ 배경/전투 캐릭터</button>
-<button class="subnav-btn" data-page="item" onclick="switchCollectionPage('item')">📚 도감</button>
 </div><div class="collection-page active" id="view-character">
 <div class="char-custom-layout">
 <div id="char-preview-zone">
 <img id="char-preview-bg" onerror="handleAssetImageError(this)" onload="handleAssetImageLoad(this)" src="assets/art/backgrounds/lobby/bg_lobby_0001.png"/>
 <img id="char-preview-body" onerror="handleAssetImageError(this)" onload="handleAssetImageLoad(this)" src="assets/art/characters/char_0001.png"/>
 <div id="char-emoji-layer" aria-label="배치된 이모지"></div>
+<div id="char-customize-category-notice">✦ 꾸미기 중 · 카테고리가 열려 있어 이동/크기/회전 등 직접 꾸미기는 잠시 사용할 수 없어요. 카테고리를 닫으면 바로 이어서 편집할 수 있습니다.</div>
 <button id="char-customize-btn" onclick="enterCharCustomizeMode()">✦ 꾸미기</button>
 <div id="char-customize-topbar">
   <button onclick="cancelCharCustomizeMode()">취소</button><b>꾸미기</b><button class="primary" onclick="finishCharCustomizeMode()">완료</button>
 </div>
 <div id="char-customize-toolbar">
-  <div class="char-edit-targets"><button id="char-edit-character" onclick="setCharEditTarget('character')">캐릭터</button><button id="char-edit-background" onclick="setCharEditTarget('background')">배경</button><button onclick="openEmojiLibrary()">😊 이모지</button></div>
+  <div class="char-edit-targets"><button id="char-edit-character" onclick="setCharEditTarget('character')">캐릭터</button><button id="char-edit-background" onclick="setCharEditTarget('background')">배경</button><button id="char-edit-emoji" onclick="setCharEditTarget('emoji')">😊 이모지</button></div>
   <div id="char-edit-character-controls" class="char-edit-controls"><button onclick="adjustCharScale(-0.08)">−</button><span>크기</span><button onclick="adjustCharScale(0.08)">＋</button><button onclick="adjustCharRotate(-8)">↶</button><span>회전</span><button onclick="adjustCharRotate(8)">↷</button><button onclick="flipCharacter()">⇆ 반전</button><button onclick="resetCharacterTransform()">↺ 초기화</button></div>
   <div id="char-edit-background-controls" class="char-edit-controls"><button onclick="adjustBackgroundScale(-0.08)">−</button><span>확대</span><button onclick="adjustBackgroundScale(0.08)">＋</button><button onclick="resetBackgroundTransform()">↺ 초기화</button></div>
+  <div id="char-edit-emoji-controls" class="char-edit-controls">
+    <button onclick="adjustSelectedEmojiScale(-0.10)">−</button><span>크기</span><button onclick="adjustSelectedEmojiScale(0.10)">＋</button>
+    <button onclick="adjustSelectedEmojiRotate(-15)">↶</button><span>회전</span><button onclick="adjustSelectedEmojiRotate(15)">↷</button>
+    <button onclick="flipSelectedEmoji()">⇆ 반전</button>
+    <button onclick="resetSelectedEmojiTransform()">↺ 초기화</button>
+    <button class="danger" onclick="deleteSelectedEmoji()">🗑 삭제</button>
+  </div>
   <div class="char-emoji-actions"><button onclick="openEmojiLibrary()">＋ 이모지 추가</button><button class="danger" onclick="clearPlacedEmojis()">🗑 이모지 전체 삭제</button></div>
 </div>
 <button id="char-toggle-btn" onclick="toggleCharItemZone()">◀</button>
@@ -795,29 +941,36 @@
 </div><div class="collection-page" id="view-item">
 <div class="view-title">아이템 컬렉션</div>
 <div class="view-content">
+<div class="collection-power-card" id="collection-power-card">
+<div class="power-main"><div><div class="power-label">COLLECTION POWER</div><div class="power-value">×<span id="collection-power-value">1.00</span></div></div><div style="text-align:right;font-size:10px;font-weight:900;"><span id="collection-owned-total">0 / 0</span>종<br/>실보유 기준</div></div>
+<div class="power-sub">중복은 Power에 추가되지 않습니다. 마지막 보유품을 판매·분해·합성하면 Power가 내려갑니다.</div>
+<div class="power-tier-row" id="collection-power-tiers"></div>
+</div>
 <div class="panel">
 <div class="panel-title"><span>획득 가능 아이템 도감</span><span style="font-size:11px; font-weight:normal; color:#999;">미획득도 회색으로 표시</span></div>
 <div class="collection-tabs" id="item-category-tabs"></div>
+<div class="collection-filter-row">
+<div class="collection-filter-hint">보유 중인 수집품만 빠르게 확인할 수 있어요.</div>
+<button class="owned-only-toggle" id="codex-owned-only-btn" onclick="toggleCodexOwnedOnly()"><span class="check">✓</span> 보유만 보기</button>
+</div>
 <div class="collection-summary" id="item-collection-summary">컬렉션을 불러오는 중...</div>
 <div class="inventory-grid" id="item-collection-grid"></div>
 </div>
 </div>
 </div></div><div class="view-container" id="view-menu">
 <div class="subnav-row" id="menu-subnav">
-<button class="subnav-btn active" data-page="leaderboard" onclick="switchMenuPage('leaderboard')">🏆 리더보드</button>
-<button class="subnav-btn" data-page="stats" onclick="switchMenuPage('stats')">📊 기록</button>
+<button class="subnav-btn active" data-page="stats" onclick="switchMenuPage('stats')">📊 기록</button>
 <button class="subnav-btn" data-page="settings" onclick="switchMenuPage('settings')">⚙️ 설정</button>
 </div>
-<div class="menu-page active" id="menu-leaderboard">
-<div class="leaderboard-wrap">
-<div class="score-hero-card"><div class="score-hero-label">현재 진행 중인 한 판</div><div class="score-hero-value">⭐ <span id="menu-current-score">0</span></div><div class="score-hero-sub">게임 오버될 때 점수가 확정됩니다.<br/>골드와 배수는 SCORE에 직접 영향을 주지 않습니다.</div></div>
-<div class="period-tabs"><button class="period-btn active" id="period-weekly" onclick="setLeaderboardPeriod('weekly')">주간</button><button class="period-btn" id="period-monthly" onclick="setLeaderboardPeriod('monthly')">월간</button></div>
+<div class="menu-page active" id="menu-stats">
+<div class="record-page-wrap">
+<div class="score-hero-card"><div class="score-hero-label">현재 진행 중인 한 판</div><div class="score-hero-value">⭐ <span id="menu-current-score">0</span></div><div class="score-hero-sub">게임 오버될 때 점수가 확정됩니다.<br/>Collection Power <b>×<span id="record-power-value">1.00</span></b>가 머지 SCORE에 적용됩니다.</div></div>
+<div class="settings-title" style="margin:2px 2px 6px;">🏆 나의 최고 기록</div>
+<div class="period-tabs"><button class="period-btn" id="period-daily" onclick="setLeaderboardPeriod('daily')">일간</button><button class="period-btn active" id="period-weekly" onclick="setLeaderboardPeriod('weekly')">주간</button><button class="period-btn" id="period-monthly" onclick="setLeaderboardPeriod('monthly')">월간</button><button class="period-btn" id="period-all" onclick="setLeaderboardPeriod('all')">전체</button></div>
 <div id="leaderboard-list"></div>
-<div class="info-note">현재 HTML 프로토타입에서는 내 기록을 로컬에 저장합니다. Steam 출시 빌드에서는 같은 SCORE 값을 Steam Leaderboards에 연결하면 전체 유저 순위를 표시할 수 있습니다.</div>
+<div class="info-note" style="margin-bottom:12px;">다른 사람과 순위를 겨루지 않고, 기간별 <b>나의 최고 SCORE</b>를 스스로 갱신하는 기록입니다.</div>
+<div class="settings-group"><div class="settings-title">📊 플레이 기록</div><div id="run-stats-content"></div></div>
 </div>
-</div>
-<div class="menu-page" id="menu-stats">
-<div class="settings-wrap"><div class="settings-group"><div class="settings-title">📊 플레이 기록</div><div id="run-stats-content"></div></div></div>
 </div>
 <div class="menu-page" id="menu-settings">
 <div class="settings-wrap">
@@ -849,13 +1002,13 @@
 
 <div class="settings-group"><div class="settings-title">🔔 알림</div>
 <div class="setting-row"><div><div class="setting-name">보스 등장 알림</div><div class="setting-desc">다른 일을 하는 중에도 보스 출현을 알림</div></div><button class="toggle-switch on" id="setting-notify-boss" onclick="toggleGameSetting('notifyBoss')">ON</button></div>
-<div class="setting-row"><div><div class="setting-name">뽑기 가능 알림</div><div class="setting-desc">10초 카운트가 끝나면 알림</div></div><button class="toggle-switch on" id="setting-notify-gacha" onclick="toggleGameSetting('notifyGacha')">ON</button></div>
+<div class="setting-row"><div><div class="setting-name">뽑기 가능 알림</div><div class="setting-desc">30분 카운트가 끝나면 알림</div></div><button class="toggle-switch on" id="setting-notify-gacha" onclick="toggleGameSetting('notifyGacha')">ON</button></div>
 <div class="setting-row"><div><div class="setting-name">위험 상태 알림</div><div class="setting-desc">데드라인 위험 상태가 시작되면 알림</div></div><button class="toggle-switch on" id="setting-notify-danger" onclick="toggleGameSetting('notifyDanger')">ON</button></div>
 </div>
 
 <div class="settings-group"><div class="settings-title">⚙️ 기타</div>
 <div class="setting-row"><div><div class="setting-name">언어</div><div class="setting-desc">현재 프로토타입 기본 언어</div></div><div class="setting-control"><select class="setting-select" id="setting-language" onchange="setGameSettingValue('language',this.value)"><option value="ko">한국어</option><option value="en">English</option></select></div></div>
-<div class="setting-row"><div><div class="setting-name">데이터 초기화</div><div class="setting-desc">설정·리더보드·일일 구매 기록을 초기화</div></div><button class="setting-action danger" onclick="resetAllLocalData()">초기화</button></div>
+<div class="setting-row"><div><div class="setting-name">데이터 초기화</div><div class="setting-desc">설정·플레이 기록·일일 구매 기록을 초기화</div></div><button class="setting-action danger" onclick="resetAllLocalData()">초기화</button></div>
 <div class="setting-row"><div><div class="setting-name">버전 / 크레딧</div><div class="setting-desc">Merge & Roll Steam Companion Prototype</div></div><button class="setting-action" onclick="showVersionInfo()">V10 보기</button></div>
 </div>
 <div class="info-note">브라우저/모바일 테스트에서는 창 자체를 제어할 수 없는 옵션(항상 위, 창 위치 기억, 모서리 스냅)은 설정값과 UI까지 검증됩니다. Steam 패키징 시 <b>mergeRollDesktop</b> 브리지에 연결하면 동일 설정이 실제 창에 적용됩니다.</div>
@@ -864,17 +1017,20 @@
 </div>
 </div>
 <!-- 하단 네비게이션 (4개 탭) -->
-<div id="bottom-nav"><div class="nav-item" id="nav-shop" onclick="switchMenu('shop')"><div class="icon">🛒</div><div>상점</div></div><div class="nav-item active" id="nav-battle" onclick="switchMenu('battle')"><div class="icon">⚔️</div><div>플레이</div></div><div class="nav-item" id="nav-collection" onclick="switchMenu('collection')"><div class="icon">🎒</div><div>컬렉션</div></div><div class="nav-item" id="nav-menu" onclick="switchMenu('menu')"><div class="icon">☰</div><div>메뉴</div></div></div>
+<div id="bottom-nav"><div class="nav-item" id="nav-shop" onclick="switchMenu('shop')"><div class="icon">🛒</div><div>상점</div></div><div class="nav-item active" id="nav-battle" onclick="switchMenu('battle')"><div class="icon">⚔️</div><div>플레이</div></div><div class="nav-item" id="nav-collection" onclick="switchMenu('collection')"><div class="icon">🎒</div><div>컬렉션</div></div><div class="nav-item" id="nav-codex" onclick="switchMenu('codex')"><div class="icon">📚</div><div>도감</div></div><div class="nav-item" id="nav-menu" onclick="switchMenu('menu')"><div class="icon">☰</div><div>메뉴</div></div></div>
+<div id="record-break-banner" aria-live="polite"><div class="rb-kicker">NEW RECORD</div><div class="rb-title" id="record-break-title">기록 돌파!</div><div class="rb-score">🏆 <span id="record-break-score">0</span></div></div>
 <!-- 통합 가챠 연출 오버레이 -->
 <div id="event-overlay">
 <div id="event-result"></div>
 </div>
 <!-- 게임오버 오버레이 -->
 <div class="overlay" id="overlay-gameover">
-<div style="font-size: 50px; margin-bottom: 15px;">💥</div>
-<div style="font-size: 28px; font-weight: bold; margin-bottom: 10px; color:#ff7675;">게임 오버!</div>
-<div style="font-size: 16px; margin-bottom: 30px; text-align:center; line-height:1.4;">한 판의 SCORE가 확정되었습니다.<br/><div style="margin-top:12px;font-size:28px;font-weight:1000;color:#ffeaa7;">⭐ <span id="go-final-score">0</span></div><div style="font-size:12px;margin-top:6px;color:#dfe6e9;">최대 연속 머지 <b id="go-max-chain">1</b> · 총 머지 <b id="go-total-merges">0</b></div><br/><b style="color:#f6e58d;"><span id="go-timer">5</span>초 후 새 판이 시작됩니다.</b></div>
-<button class="action-btn" onclick="instantRestart()" style="padding: 12px 24px; font-size:15px; border-radius:12px; border:2px solid #b9a0e6; background:#1dd1a1; color:white; font-weight:bold; cursor:pointer;">🔄 즉시 재시작</button>
+<div id="go-icon" style="font-size:50px;margin-bottom:10px;">💥</div>
+<div id="go-record-title">🏆 PERSONAL BEST UPDATED</div>
+<div id="go-gameover-title" style="font-size:28px;font-weight:bold;margin-bottom:8px;color:#ff7675;">게임 오버!</div>
+<div id="go-record-badges"></div>
+<div style="font-size:16px;margin-bottom:30px;text-align:center;line-height:1.4;">한 판의 SCORE가 확정되었습니다.<br/><div style="margin-top:12px;font-size:31px;font-weight:1000;color:#ffeaa7;">🏆 <span id="go-final-score">0</span></div><div id="go-record-delta" style="display:none;font-size:11px;margin-top:4px;color:#55efc4;font-weight:900;"></div><div style="font-size:12px;margin-top:6px;color:#dfe6e9;">최대 연속 머지 <b id="go-max-chain">1</b> · 총 머지 <b id="go-total-merges">0</b></div><br/><b style="color:#f6e58d;"><span id="go-timer">5</span>초 후 새 판이 시작됩니다.</b></div>
+<button class="action-btn" onclick="instantRestart()" style="padding:12px 24px;font-size:15px;border-radius:12px;border:2px solid #b9a0e6;background:#1dd1a1;color:white;font-weight:bold;cursor:pointer;">🔄 즉시 재시작</button>
 </div>
 </div>
 <script>
@@ -894,6 +1050,18 @@
     const SCORE_CHAIN_WINDOW_MS = 1800;
     const MERGE_SCORE_BY_LEVEL = [0, 10, 20, 35, 55, 80, 120, 175, 250, 350, 500, 700];
 
+    // Collection Power: 현재 실제 보유한 '서로 다른 아이템'만 계산.
+    // 각 등급의 첫 마일스톤을 무한 반복하여 콘텐츠가 추가될수록 계속 성장합니다.
+    const COLLECTION_REPEAT = {
+        N:{step:30, bonus:0.05}, R:{step:20, bonus:0.08}, SR:{step:10, bonus:0.12},
+        SSR:{step:5, bonus:0.20}, UR:{step:3, bonus:0.50}
+    };
+    let collectionPowerMultiplier = 1;
+    let fragments = 0;
+    const FRAGMENT_VALUES = {N:1, R:8, SR:64, SSR:512, UR:4096};
+    const SELECTOR_COSTS = {N:20, R:100, SR:600, SSR:3500, UR:30000};
+    const ECONOMY_STORAGE_KEY = 'mergeRoll.economy.v1';
+
     // 보스 진행도는 "현재 보유 머지"와 분리해 누적 획득량으로 관리
     let totalMergeEarned = 0;
     const BOSS_MERGE_INTERVAL = 10; // TEST: 실제 서비스에서는 1000으로 변경
@@ -901,7 +1069,7 @@
     let bossActive = false;
     let bossMaxHp = 250;
     let bossHp = bossMaxHp;
-    let firstRewardForcesUR = true;
+    let firstRewardForcesUR = false; // 실제 확률 사용. UR 테스트 강제 지급 제거
 
     const uiMerge = document.getElementById('val-merge');
     const uiGold = document.getElementById('val-gold');
@@ -953,6 +1121,60 @@
         return `${d.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
     }
     function getMonthKey(date=new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
+    function getScoreDayKey(date=new Date()) {
+        return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    }
+
+    function getRunDayKey(record) {
+        if(record?.day) return record.day;
+        if(record?.endedAt) return getScoreDayKey(new Date(record.endedAt));
+        return '';
+    }
+
+    function getBestScoreByPeriod(period, now=new Date()) {
+        const day=getScoreDayKey(now), week=getWeekKey(now), month=getMonthKey(now);
+        return localRuns.reduce((best,r)=>{
+            const score=Number(r?.score||0);
+            const match =
+                period==='all' ? true :
+                period==='daily' ? getRunDayKey(r)===day :
+                period==='weekly' ? r.week===week :
+                period==='monthly' ? r.month===month : false;
+            return match ? Math.max(best,score) : best;
+        },0);
+    }
+
+    const RECORD_LABELS={daily:'일간',weekly:'주간',monthly:'월간',all:'전체'};
+    let runRecordNotified={daily:false,weekly:false,monthly:false,all:false};
+    let recordBannerTimer=null;
+
+    function getCurrentRecordBreaks(score=runScore, now=new Date()) {
+        return ['daily','weekly','monthly','all'].filter(period=>Number(score)>getBestScoreByPeriod(period,now));
+    }
+
+    function showInGameRecordBreak(periods) {
+        if(!periods?.length) return;
+        const banner=document.getElementById('record-break-banner');
+        const title=document.getElementById('record-break-title');
+        const score=document.getElementById('record-break-score');
+        if(!banner||!title||!score) return;
+        title.innerText=`${periods.map(p=>RECORD_LABELS[p]).join(' · ')} 최고 기록 돌파!`;
+        score.innerText=formatCompactNumber(runScore);
+        banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show');
+        if(recordBannerTimer) clearTimeout(recordBannerTimer);
+        recordBannerTimer=setTimeout(()=>banner.classList.remove('show'),2450);
+        showFloatingText(`🏆 ${periods.map(p=>RECORD_LABELS[p]).join(' · ')} NEW RECORD!`,210,210,'#ffeaa7');
+    }
+
+    function checkLiveRecordBreaks() {
+        if(runFinished) return;
+        const breaks=getCurrentRecordBreaks();
+        const fresh=breaks.filter(p=>!runRecordNotified[p]);
+        if(!fresh.length) return;
+        fresh.forEach(p=>runRecordNotified[p]=true);
+        showInGameRecordBreak(fresh);
+    }
+
     function loadLocalRuns() { try { localRuns = JSON.parse(localStorage.getItem(LEADERBOARD_STORAGE_KEY)||'[]'); if(!Array.isArray(localRuns)) localRuns=[]; } catch(e){ localRuns=[]; } }
     function saveLocalRuns() { try { localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(localRuns.slice(-100))); } catch(e){} }
     function loadGameSettings() {
@@ -988,7 +1210,7 @@
     function updateMiniHud() {
         const ids=[['mini-score',runScore],['mini-merge',mergeCount],['mini-gold',gold]];
         ids.forEach(([id,v])=>{const el=document.getElementById(id); if(el)el.innerText=formatCompactNumber(v);});
-        const mg=document.getElementById('mini-gacha'); if(mg) mg.innerText=isGachaReady?'🎁 READY':`🎁 ${gachaTimer}s`;
+        const mg=document.getElementById('mini-gacha'); if(mg) mg.innerText=isGachaReady?'🎁 READY':`🎁 ${formatTimerMMSS(gachaTimer)}`;
         const mm=document.getElementById('mini-multiplier'); if(mm) mm.innerText=`x${typeof currentMultiplier!=='undefined'?currentMultiplier:1}`;
     }
     function applyWindowSize() {
@@ -1054,8 +1276,8 @@
         gameSettings[key]=value; saveGameSettings(); applyGameSettings();
     };
     window.resetAllLocalData=function(){
-        if(!confirm('설정, 로컬 리더보드, 일일 구매 기록을 모두 초기화할까요?'))return;
-        ['mergeRoll.settings.v7','mergeRoll.settings.v8','mergeRoll.localLeaderboard.v7','mergeRoll.localLeaderboard.v8','mergeRoll.mergePackDaily.v1'].forEach(k=>localStorage.removeItem(k));
+        if(!confirm('설정, 플레이 기록, 수집 아이템, 통합 파편, 일일 보상 기록을 모두 초기화할까요?'))return;
+        ['mergeRoll.settings.v7','mergeRoll.settings.v8','mergeRoll.localLeaderboard.v7','mergeRoll.localLeaderboard.v8','mergeRoll.mergePackDaily.v1','mergeRoll.economy.v1'].forEach(k=>localStorage.removeItem(k));
         location.reload();
     };
     window.showVersionInfo=function(){ alert('Merge & Roll\\nSteam Companion Prototype V10\\nUI/모바일/미니모드 통합 테스트 빌드'); };
@@ -1066,37 +1288,103 @@
         lastScoreMergeAt=now; maxScoreChain=Math.max(maxScoreChain,scoreChain); runMergeCount++;
         const base=MERGE_SCORE_BY_LEVEL[Math.max(0,Math.min(MERGE_SCORE_BY_LEVEL.length-1,newLevel))] || 10;
         const chainMultiplier = 1 + Math.min(9, Math.max(0,scoreChain-1))*0.10;
-        const gained=Math.max(1,Math.round(base*chainMultiplier));
+        const gained=Math.max(1,Math.round(base*chainMultiplier*collectionPowerMultiplier));
         runScore += gained;
         updateTopUI();
         const chainEl=document.getElementById('battle-chain-value');
-        if(chainEl) chainEl.innerText=scoreChain>1?`CHAIN ${scoreChain} · x${chainMultiplier.toFixed(1)}`:'';
-        showFloatingText(`🏆 +${formatCompactNumber(gained)}${scoreChain>1?` · ${scoreChain} CHAIN`:''}`,210,330,'#ffeaa7');
+        if(chainEl) chainEl.innerText=`${scoreChain>1?`CHAIN ${scoreChain} · x${chainMultiplier.toFixed(1)} · `:''}POWER x${collectionPowerMultiplier.toFixed(2)}`;
+        showFloatingText(`🏆 +${formatCompactNumber(gained)} · CP x${collectionPowerMultiplier.toFixed(2)}${scoreChain>1?` · ${scoreChain} CHAIN`:''}`,210,330,'#ffeaa7');
+        checkLiveRecordBreaks();
     }
 
     function finishRun() {
         if(runFinished) return;
         runFinished=true;
         const now=new Date();
-        const record={ score:runScore, merges:runMergeCount, maxChain:maxScoreChain, endedAt:now.toISOString(), week:getWeekKey(now), month:getMonthKey(now) };
+
+        // 저장 전에 비교해야 이번 판이 실제로 새 기록인지 정확히 판정할 수 있습니다.
+        const previousBest={
+            daily:getBestScoreByPeriod('daily',now),
+            weekly:getBestScoreByPeriod('weekly',now),
+            monthly:getBestScoreByPeriod('monthly',now),
+            all:getBestScoreByPeriod('all',now)
+        };
+        const broken=['daily','weekly','monthly','all'].filter(p=>runScore>previousBest[p]);
+
+        const record={
+            score:runScore, merges:runMergeCount, maxChain:maxScoreChain,
+            endedAt:now.toISOString(), day:getScoreDayKey(now),
+            week:getWeekKey(now), month:getMonthKey(now),
+            records:broken
+        };
         localRuns.push(record); saveLocalRuns();
+
         const fs=document.getElementById('go-final-score'); if(fs) fs.innerText=formatCompactNumber(runScore);
         const mc=document.getElementById('go-max-chain'); if(mc) mc.innerText=maxScoreChain.toLocaleString();
         const tm=document.getElementById('go-total-merges'); if(tm) tm.innerText=runMergeCount.toLocaleString();
+
+        const overlay=document.getElementById('overlay-gameover');
+        const badges=document.getElementById('go-record-badges');
+        const title=document.getElementById('go-gameover-title');
+        const icon=document.getElementById('go-icon');
+        const delta=document.getElementById('go-record-delta');
+
+        if(overlay) overlay.classList.toggle('record-celebration',broken.length>0);
+        if(badges) badges.innerHTML=broken.map(p=>`<span class="go-record-badge">🏆 ${RECORD_LABELS[p]} NEW RECORD</span>`).join('');
+        if(title) title.innerText=broken.length ? '최고 기록 갱신!' : '게임 오버!';
+        if(icon) icon.innerText=broken.length ? '🏆' : '💥';
+
+        if(delta) {
+            if(broken.length) {
+                const strongestPrevious=Math.max(...broken.map(p=>previousBest[p]),0);
+                const gain=Math.max(0,runScore-strongestPrevious);
+                delta.style.display='block';
+                delta.innerText=strongestPrevious>0
+                    ? `이전 기록보다 +${formatCompactNumber(gain)}`
+                    : '첫 기록이 등록되었습니다!';
+            } else {
+                delta.style.display='none';
+                delta.innerText='';
+            }
+        }
+
+        if(broken.length) {
+            callDesktopBridge('notify',{kind:'record',title:'🏆 최고 기록 갱신!',body:`${broken.map(p=>RECORD_LABELS[p]).join(' · ')} · SCORE ${formatCompactNumber(runScore)}`});
+        }
+
         renderLeaderboard(); renderRunStats();
     }
-    function resetRunScore() { runScore=0; runMergeCount=0; scoreChain=0; maxScoreChain=0; lastScoreMergeAt=0; runFinished=false; const c=document.getElementById('battle-chain-value'); if(c)c.innerText=''; updateTopUI(); }
+    function resetRunScore() {
+        runScore=0; runMergeCount=0; scoreChain=0; maxScoreChain=0; lastScoreMergeAt=0; runFinished=false;
+        runRecordNotified={daily:false,weekly:false,monthly:false,all:false};
+        const banner=document.getElementById('record-break-banner'); if(banner) banner.classList.remove('show');
+        const c=document.getElementById('battle-chain-value'); if(c)c.innerText='';
+        updateTopUI();
+    }
 
-    window.setLeaderboardPeriod=function(period){ leaderboardPeriod=period==='monthly'?'monthly':'weekly'; renderLeaderboard(); };
+    window.setLeaderboardPeriod=function(period){
+        leaderboardPeriod = ['daily','weekly','monthly','all'].includes(period) ? period : 'weekly';
+        renderLeaderboard();
+    };
     function renderLeaderboard(){
         const list=document.getElementById('leaderboard-list'); if(!list) return;
-        const now=new Date(); const key=leaderboardPeriod==='monthly'?getMonthKey(now):getWeekKey(now);
-        const rows=localRuns.filter(r=>(leaderboardPeriod==='monthly'?r.month:r.week)===key).sort((a,b)=>b.score-a.score);
+        const now=new Date();
+        const day=getScoreDayKey(now), week=getWeekKey(now), month=getMonthKey(now);
+        const rows = localRuns
+            .filter(r => leaderboardPeriod==='all' ? true :
+                leaderboardPeriod==='daily' ? getRunDayKey(r)===day :
+                leaderboardPeriod==='monthly' ? r.month===month : r.week===week)
+            .sort((a,b)=>(b.score||0)-(a.score||0));
         const best=rows[0];
+        const label = leaderboardPeriod==='daily' ? '일간' : (leaderboardPeriod==='weekly' ? '주간' : (leaderboardPeriod==='monthly' ? '월간' : '전체'));
+
+        document.getElementById('period-daily')?.classList.toggle('active',leaderboardPeriod==='daily');
         document.getElementById('period-weekly')?.classList.toggle('active',leaderboardPeriod==='weekly');
         document.getElementById('period-monthly')?.classList.toggle('active',leaderboardPeriod==='monthly');
-        list.innerHTML=`<div class="rank-card me"><div><div class="rank-main">🏆 내 ${leaderboardPeriod==='weekly'?'주간':'월간'} 최고 기록</div><div class="rank-sub">${best?`총 머지 ${best.merges} · 최대 체인 ${best.maxChain}`:'아직 종료된 판이 없습니다.'}</div></div><div class="rank-score">${best?formatCompactNumber(best.score):'—'}</div></div>` +
-          `<div class="info-note" style="margin-bottom:10px;">현재 판은 <b>${formatCompactNumber(runScore)}</b>점입니다. 게임 오버되면 이 기록이 확정되어 최고 기록과 비교됩니다.</div>`;
+        document.getElementById('period-all')?.classList.toggle('active',leaderboardPeriod==='all');
+
+        list.innerHTML=`<div class="rank-card me"><div><div class="rank-main">🏆 나의 ${label} 최고 기록</div><div class="rank-sub">${best?`총 머지 ${Number(best.merges||0).toLocaleString()} · 최대 연속 머지 ${Number(best.maxChain||0).toLocaleString()}`:'아직 종료된 판이 없습니다.'}</div></div><div class="rank-score">${best?formatCompactNumber(best.score):'—'}</div></div>` +
+          `<div class="info-note" style="margin-bottom:10px;">현재 판은 <b>${formatCompactNumber(runScore)}</b>점입니다. 게임 오버 후 ${label} 최고 기록과 비교됩니다.</div>`;
     }
     function renderRunStats(){
         const el=document.getElementById('run-stats-content'); if(!el)return;
@@ -1237,18 +1525,28 @@
         showFloatingText(`🔄 머지 +10 · 오늘 ${mergePackDaily.count}/${MERGE_PACK_DAILY_LIMIT}`, 210, 400, '#6a4c9c');
     };
 
-    // ================= [ 💡 타이머 시스템 복구 (10초 대기) ] =================
-    let gachaTimer = 10; 
-    let isGachaReady = false; // 게임 시작과 동시에 10초 카운트다운
+    // ================= [ 30분 실행 유지 뽑기 ] =================
+    const GACHA_INTERVAL_SECONDS = 30 * 60;
+    let gachaTimer = GACHA_INTERVAL_SECONDS;
+    let isGachaReady = false; // 게임 실행 후 30분이 지나면 1회 충전, 중첩 충전 없음.
 
     setInterval(() => {
-        if (globalPause) return;
+        // 접속/실행 자체가 보상 조건이므로 전투 일시정지/상점 오버레이 중에도 시간은 흐릅니다.
         if (!isGachaReady) {
             gachaTimer--;
-            if (gachaTimer <= 0) { isGachaReady = true; gachaTimer = 10; if(typeof notifyUser==='function') notifyUser('gacha','🎁 뽑기 준비 완료','Merge & Roll 뽑기를 사용할 수 있습니다.'); }
+            if (gachaTimer <= 0) {
+                isGachaReady = true;
+                gachaTimer = GACHA_INTERVAL_SECONDS;
+                if(typeof notifyUser==='function') notifyUser('gacha','🎁 30분 뽑기 준비 완료','Merge & Roll 뽑기를 사용할 수 있습니다.');
+            }
         }
         updateGachaUI();
     }, 1000);
+
+    function formatTimerMMSS(seconds) {
+        const s=Math.max(0,Math.floor(Number(seconds)||0));
+        return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    }
 
     function updateGachaUI() {
         const btn = document.getElementById('btn-pull-gacha');
@@ -1256,22 +1554,24 @@
         const topTimer = document.getElementById('top-gacha-timer');
 
         if (isGachaReady) {
-            if(timerDisplay) timerDisplay.innerText = "✅ 준비 완료";
+            if(timerDisplay) timerDisplay.innerText = "✅ 30분 보상 준비 완료";
             if(topTimer) {
-                topTimer.innerHTML = '<span style="color:#27ae60;">뽑기 ✅ 완료</span>';
+                topTimer.innerHTML = '<span style="color:#27ae60;">뽑기 ✅ READY</span>';
                 topTimer.style.borderColor = '#27ae60';
                 topTimer.style.backgroundColor = '#f0fff4';
             }
         } else {
-            if(timerDisplay) timerDisplay.innerText = `⏳ ${gachaTimer}s`;
+            const timerText=formatTimerMMSS(gachaTimer);
+            if(timerDisplay) timerDisplay.innerText = `⏳ ${timerText}`;
             if(topTimer) {
-                topTimer.innerHTML = `뽑기 ⏳ ${gachaTimer}s`;
+                topTimer.innerHTML = `뽑기 ⏳ ${timerText}`;
                 topTimer.style.borderColor = '#f39c12';
                 topTimer.style.backgroundColor = '#fffdf2';
             }
         }
+        updateDailyFreeUI();
 
-        // 1회 뽑기 조건 (골드100, 머지50, 타이머)
+        // 1회 뽑기 조건 (골드100, 머지50, 30분 충전)
         if (btn) {
             if (gold >= 100 && mergeCount >= 50 && isGachaReady) {
                 btn.disabled = false; btn.style.opacity = 1;
@@ -1285,8 +1585,8 @@
     const TIER_ORDER = ['N', 'R', 'SR', 'SSR', 'UR'];
     const LEGACY_TIER_MAP = { C:'N', B:'R', A:'SR', S:'SSR', SS:'UR', N:'N', R:'R', SR:'SR', SSR:'SSR', UR:'UR' };
     function normalizeTier(tier) { return LEGACY_TIER_MAP[String(tier || '').toUpperCase()] || null; }
-    // 요청 확률은 합계가 100%를 넘으므로 동일 비율의 가중치로 정규화하여 사용
-    const GACHA_WEIGHTS = { N: 90, R: 9.5, SR: 0.49, SSR: 0.49, UR: 0.0002 };
+    // 확정 뽑기 확률: 합계 정확히 100%
+    const GACHA_WEIGHTS = { N:75, R:15, SR:8, SSR:1.999, UR:0.001 };
     function rollTier() {
         const total = Object.values(GACHA_WEIGHTS).reduce((a,b)=>a+b,0);
         let r = Math.random() * total;
@@ -1636,6 +1936,166 @@
         return null;
     }
 
+    const ALL_COLLECTIBLE_CATEGORIES = ['item','skin','char','battle_char','char_bg','bg_battle','bg_merge','bg_border'];
+
+    function getAllCollectibles(tier=null) {
+        const out=[];
+        const add=(category,id,t)=>out.push({category,id,tier:t,inv:getInventoryRef(category),count:getInventoryRef(category)?.[id]?.count||0});
+        TIER_ORDER.forEach(t=>{
+            if(tier && t!==tier) return;
+            (ITEMS_DB[t]||[]).forEach(id=>add('item',id,t));
+            (SKIN_DB[t]||[]).forEach(id=>add('skin',id,t));
+            (CHARS_DB[t]||[]).forEach(id=>add('char',id,t));
+            (BATTLE_CHARS_DB[t]||[]).forEach(id=>add('battle_char',id,t));
+            (CHAR_BG_DB[t]||[]).forEach(id=>add('char_bg',id,t));
+            (BG_TYPE_DB.bg_battle[t]||[]).forEach(id=>add('bg_battle',id,t));
+            (BG_TYPE_DB.bg_merge[t]||[]).forEach(id=>add('bg_merge',id,t));
+            (BG_TYPE_DB.bg_border[t]||[]).forEach(id=>add('bg_border',id,t));
+        });
+        return out;
+    }
+
+    function getUniqueOwnedByTier() {
+        const counts=Object.fromEntries(TIER_ORDER.map(t=>[t,0]));
+        getAllCollectibles().forEach(x=>{ if((x.inv?.[x.id]?.count||0)>0) counts[x.tier]++; });
+        return counts;
+    }
+
+    function calculateCollectionPower(overrides=null) {
+        const counts=Object.fromEntries(TIER_ORDER.map(t=>[t,0]));
+        for(const x of getAllCollectibles()) {
+            let count=Number(x.inv?.[x.id]?.count||0);
+            if(overrides) {
+                const key=`${x.category}::${String(x.id)}`;
+                if(Object.prototype.hasOwnProperty.call(overrides,key)) count=Number(overrides[key]||0);
+            }
+            if(count>0) counts[x.tier]++;
+        }
+        let bonus=0;
+        const tierDetails={};
+        TIER_ORDER.forEach(t=>{
+            const rule=COLLECTION_REPEAT[t];
+            const levels=Math.floor(counts[t]/rule.step);
+            const tierBonus=levels*rule.bonus;
+            bonus+=tierBonus;
+            tierDetails[t]={owned:counts[t],levels,bonus:tierBonus,nextAt:(levels+1)*rule.step,step:rule.step,each:rule.bonus};
+        });
+        return {multiplier:1+bonus,bonus,tierDetails,totalOwned:Object.values(counts).reduce((a,b)=>a+b,0),counts};
+    }
+
+    function refreshCollectionPowerUI() {
+        const p=calculateCollectionPower();
+        collectionPowerMultiplier=p.multiplier;
+        const val=document.getElementById('collection-power-value');
+        if(val) val.innerText=p.multiplier.toFixed(2);
+        const total=document.getElementById('collection-owned-total');
+        if(total) total.innerText=`${p.totalOwned} / ${getAllCollectibles().length}`;
+        const row=document.getElementById('collection-power-tiers');
+        if(row) {
+            row.innerHTML=TIER_ORDER.map(t=>{
+                const d=p.tierDetails[t];
+                return `<div class="power-tier-cell"><b>${t}</b><br/>${d.owned}종<br/>+${Math.round(d.bonus*100)}%</div>`;
+            }).join('');
+        }
+        const recordPower=document.getElementById('record-power-value');
+        if(recordPower) recordPower.innerText=p.multiplier.toFixed(2);
+        return p;
+    }
+
+    function collectionPowerAfterDelta(category,id,delta) {
+        const inv=getInventoryRef(category);
+        if(!inv?.[id]) return refreshCollectionPowerUI();
+        const next=Math.max(0,Number(inv[id].count||0)+Number(delta||0));
+        return calculateCollectionPower({[`${category}::${String(id)}`]:next});
+    }
+
+    // Steamworks 판매 UI에서도 그대로 재사용할 수 있는 공개 계산 함수.
+    window.previewCollectionPowerRemoval=function(category,id,amount=1){
+        const before=calculateCollectionPower();
+        const after=collectionPowerAfterDelta(category,id,-Math.max(1,Number(amount)||1));
+        return {before:before.multiplier,after:after.multiplier,loss:Math.max(0,before.multiplier-after.multiplier)};
+    };
+
+    // Steamworks 연동용 데이터 훅.
+    // 실제 결제/거래는 네이티브 Steamworks 계층에서 성공한 뒤 이 함수를 호출합니다.
+    window.receiveSteamMarketItem=function(category,id,quantity=1){
+        const inv=getInventoryRef(category);
+        if(!inv?.[id]) return {ok:false,reason:'unknown_item'};
+        const qty=Math.max(1,Math.floor(Number(quantity)||1));
+        const before=calculateCollectionPower();
+        inv[id].count+=qty;
+        saveEconomyState();
+        const after=refreshCollectionPowerUI();
+        updateAllUIs();
+        return {ok:true,quantity:qty,beforePower:before.multiplier,afterPower:after.multiplier};
+    };
+
+    window.previewSteamMarketSale=function(category,id,quantity=1){
+        const inv=getInventoryRef(category);
+        if(!inv?.[id] || inv[id].count<=0) return {ok:false,reason:'not_owned'};
+        const qty=Math.min(inv[id].count,Math.max(1,Math.floor(Number(quantity)||1)));
+        const before=calculateCollectionPower();
+        const after=collectionPowerAfterDelta(category,id,-qty);
+        return {
+            ok:true,quantity:qty,
+            beforePower:before.multiplier,afterPower:after.multiplier,
+            powerLoss:Math.max(0,before.multiplier-after.multiplier),
+            removesLastCopy:(inv[id].count-qty)<=0
+        };
+    };
+
+    // 실제 Steam 판매 성공 콜백에서만 호출하도록 분리.
+    window.commitSteamMarketSale=function(category,id,quantity=1){
+        const preview=window.previewSteamMarketSale(category,id,quantity);
+        if(!preview.ok) return preview;
+        const inv=getInventoryRef(category);
+        inv[id].count-=preview.quantity;
+        saveEconomyState(); updateAllUIs();
+        return preview;
+    };
+
+    function inventorySnapshotForSave() {
+        const snap={};
+        ALL_COLLECTIBLE_CATEGORIES.forEach(cat=>{
+            const inv=getInventoryRef(cat); snap[cat]={};
+            Object.entries(inv||{}).forEach(([id,v])=>snap[cat][id]=Math.max(0,Number(v?.count||0)));
+        });
+        return snap;
+    }
+
+    function applyInventorySnapshot(snap) {
+        if(!snap || typeof snap!=='object') return;
+        ALL_COLLECTIBLE_CATEGORIES.forEach(cat=>{
+            const inv=getInventoryRef(cat), saved=snap[cat];
+            if(!inv || !saved) return;
+            Object.entries(saved).forEach(([id,count])=>{
+                if(inv[id]) inv[id].count=Math.max(0,Number(count)||0);
+            });
+        });
+    }
+
+    function saveEconomyState() {
+        if(testUnlockAll) return; // 테스트 전체 해금 상태는 영구 저장하지 않음.
+        try {
+            localStorage.setItem(ECONOMY_STORAGE_KEY,JSON.stringify({
+                fragments,
+                inventory:inventorySnapshotForSave(),
+                dailyFreeDate:dailyFreeState.date,
+                dailyFreeClaimed:dailyFreeState.claimed
+            }));
+        } catch(e) {}
+    }
+
+    function loadEconomyState() {
+        try {
+            const saved=JSON.parse(localStorage.getItem(ECONOMY_STORAGE_KEY)||'null');
+            if(!saved) return;
+            fragments=Math.max(0,Number(saved.fragments)||0);
+            applyInventorySnapshot(saved.inventory);
+            if(saved.dailyFreeDate) dailyFreeState={date:String(saved.dailyFreeDate),claimed:!!saved.dailyFreeClaimed};
+        } catch(e) { console.warn('[Merge&Roll] economy save load failed',e); }
+    }
+
     function getHtmlForCategoryAndId(cat, id) {
         if (cat === 'item') return `<div class="emoji" style="font-size:24px;">${id}</div>`;
         if (cat === 'skin') return `<img src="${id}" style="width:30px; height:30px; object-fit:contain;">`;
@@ -1658,12 +2118,15 @@
     }
 
     function updateAllUIs() {
+        refreshCollectionPowerUI();
         updateTopUI();
         if (typeof updateGlobalCraftUI === 'function') updateGlobalCraftUI();
         if (typeof updateSkinUI === 'function') updateSkinUI();
         if (typeof initCharUI === 'function') initCharUI();
         if (typeof initBgUI === 'function') initBgUI();
         if (typeof updateItemUI === 'function') updateItemUI();
+        if (typeof renderShardEconomyUI === 'function') renderShardEconomyUI();
+        if (typeof updateDailyFreeUI === 'function') updateDailyFreeUI();
     }
 
 
@@ -1733,6 +2196,41 @@
         updateAllUIs();
     };
 
+    // ================= [ 일일 무료 뽑기 ] =================
+    let dailyFreeState={date:'',claimed:false};
+
+    function ensureDailyFreeDay() {
+        const today=getLocalDayKey();
+        if(dailyFreeState.date!==today) {
+            dailyFreeState={date:today,claimed:false};
+            saveEconomyState();
+        }
+    }
+
+    function updateDailyFreeUI() {
+        ensureDailyFreeDay();
+        const btn=document.getElementById('btn-daily-free');
+        const badge=document.getElementById('daily-free-badge');
+        const status=document.getElementById('daily-free-status');
+        if(!btn) return;
+        btn.disabled=!!dailyFreeState.claimed;
+        btn.style.opacity=dailyFreeState.claimed?.58:1;
+        if(badge) badge.style.display=dailyFreeState.claimed?'none':'block';
+        if(status) status.innerText=dailyFreeState.claimed?'오늘 무료 뽑기 완료 ✓':'오늘 접속 보상 · 1회 무료';
+    }
+
+    window.claimDailyFreeDraw=function(){
+        if(globalPause) return;
+        ensureDailyFreeDay();
+        if(dailyFreeState.claimed){ showFloatingText('오늘의 무료 뽑기는 이미 사용했습니다.',210,400,'#6a4c9c'); return; }
+        dailyFreeState.claimed=true;
+        saveEconomyState();
+        updateDailyFreeUI();
+        const results=generateDrops(1);
+        saveEconomyState();
+        showGachaResults(results,'🎁 DAILY FREE DRAW!');
+    };
+
     // ================= [ 상점: 통합 뽑기 + 테스트 지급 ] =================
     function generateDrops(times) {
         const results = [];
@@ -1783,13 +2281,13 @@
         times = Math.max(1, Number(times) || 1);
         if (!isGachaReady) { showFloatingText('아직 타이머가 돌고 있습니다!', 210, 400, '#ff7675'); return; }
         if (gold < 100 || mergeCount < 50) { showFloatingText('골드 또는 머지 포인트가 부족합니다!', 210, 400, '#ff7675'); return; }
-        gold -= 100; mergeCount -= 50; isGachaReady=false; gachaTimer=10; updateTopUI();
-        showGachaResults(generateDrops(times));
+        gold -= 100; mergeCount -= 50; isGachaReady=false; gachaTimer=GACHA_INTERVAL_SECONDS; updateTopUI();
+        const results=generateDrops(times); saveEconomyState(); showGachaResults(results);
     };
 
     window.grantTestItems = function(times=10) {
         if (globalPause) return;
-        showGachaResults(generateDrops(Math.max(1, Number(times)||10)), '🧪 테스트 10개 지급!');
+        const results=generateDrops(Math.max(1, Number(times)||10)); showGachaResults(results, '🧪 테스트 10개 지급!');
     };
 
     window.closeGacha = function() {
@@ -1805,14 +2303,14 @@
         let items = [];
         TIER_ORDER.forEach(tier => {
             if (tier === 'UR') return; // UR은 최종 등급: 합성 가능 목록에 표시하지 않음
-            CHARS_DB[tier].forEach(id => { if(charInventory[id].count > 1) items.push({category:'char', id, tier, count: charInventory[id].count}); });
-            BATTLE_CHARS_DB[tier].forEach(id => { if((battleCharInventory[id]?.count||0) > 1) items.push({category:'battle_char', id, tier, count: battleCharInventory[id].count}); });
-            CHAR_BG_DB[tier].forEach(id => { if(charBgInventory[id].count > 1) items.push({category:'char_bg', id, tier, count: charBgInventory[id].count}); });
-            SKIN_DB[tier].forEach(id => { if(skinInventory[id].count > 1) items.push({category:'skin', id, tier, count: skinInventory[id].count}); });
-            ITEMS_DB[tier].forEach(id => { if(itemInventory[id].count > 1) items.push({category:'item', id, tier, count: itemInventory[id].count}); });
+            CHARS_DB[tier].forEach(id => { if(charInventory[id].count > 0) items.push({category:'char', id, tier, count: charInventory[id].count}); });
+            BATTLE_CHARS_DB[tier].forEach(id => { if((battleCharInventory[id]?.count||0) > 0) items.push({category:'battle_char', id, tier, count: battleCharInventory[id].count}); });
+            CHAR_BG_DB[tier].forEach(id => { if(charBgInventory[id].count > 0) items.push({category:'char_bg', id, tier, count: charBgInventory[id].count}); });
+            SKIN_DB[tier].forEach(id => { if(skinInventory[id].count > 0) items.push({category:'skin', id, tier, count: skinInventory[id].count}); });
+            ITEMS_DB[tier].forEach(id => { if(itemInventory[id].count > 0) items.push({category:'item', id, tier, count: itemInventory[id].count}); });
             for (const type of ['bg_battle','bg_merge','bg_border']) {
                 (BG_TYPE_DB[type][tier]||[]).forEach(id => {
-                    if((bgInventory[type][id]?.count||0) > 1) items.push({category:type, id, tier, count:bgInventory[type][id].count});
+                    if((bgInventory[type][id]?.count||0) > 0) items.push({category:type, id, tier, count:bgInventory[type][id].count});
                 });
             }
         });
@@ -1855,7 +2353,7 @@
                         globalCraftSlots.push({category: item.category, id: item.id, tier: tier});
                         updateAllUIs();
                     };
-                    div.innerHTML = `<div class="tier-label tier-${tier}">${tier}</div>` + getHtmlForCategoryAndId(item.category, item.id) + `<div class="count">${item.count}</div>`;
+                    div.innerHTML = `<div class="tier-label tier-${tier}">${tier}</div>` + getHtmlForCategoryAndId(item.category, item.id) + `<div class="count">${getInventoryRef(item.category)[item.id].count}</div>`;
                     grid.appendChild(div);
                 });
             }
@@ -1905,8 +2403,28 @@
         const tierIndex = TIER_ORDER.indexOf(currentTier);
         if(tierIndex === -1 || currentTier === 'UR') { showFloatingText("합성 불가 등급입니다.", 210, 300, "#ff7675"); return; }
         
+        // 합성 재료 중 마지막 보유품이 포함되면 Collection Power 감소를 먼저 명확히 안내.
+        const beforePower=calculateCollectionPower();
+        const removalCount={};
+        globalCraftSlots.forEach(x=>{
+            const key=`${x.category}::${String(x.id)}`;
+            removalCount[key]=(removalCount[key]||0)+1;
+        });
+        const overrides={};
+        Object.entries(removalCount).forEach(([key,n])=>{
+            const [cat,idRaw]=key.split('::');
+            const inv=getInventoryRef(cat);
+            const actualKey=Object.keys(inv||{}).find(k=>String(k)===idRaw);
+            if(actualKey!==undefined) overrides[key]=Math.max(0,Number(inv[actualKey]?.count||0)-n);
+        });
+        const afterRemoval=calculateCollectionPower(overrides);
+        if(afterRemoval.multiplier < beforePower.multiplier) {
+            const ok=confirm(`⚠️ 마지막 보유품이 합성 재료에 포함되어 있습니다.\n\nCollection Power\n×${beforePower.multiplier.toFixed(2)} → ×${afterRemoval.multiplier.toFixed(2)} (-${(beforePower.multiplier-afterRemoval.multiplier).toFixed(2)})\n\n상위 등급 결과에 따라 Power가 다시 증가할 수 있습니다. 계속 합성할까요?`);
+            if(!ok) return;
+        }
+
         const nextTier = TIER_ORDER[tierIndex + 1];
-        const categories = ['item', 'skin', 'char', 'bg_battle', 'bg_merge', 'bg_border'];
+        const categories = ['item','skin','char','battle_char','char_bg','bg_battle','bg_merge','bg_border'];
         let validCats = categories.filter(cat => getPool(cat, nextTier).length > 0);
         if(validCats.length === 0) validCats = categories.filter(cat => getPool(cat, 'SSR').length > 0); 
         
@@ -1916,7 +2434,7 @@
         
         globalCraftSlots = []; 
         getInventoryRef(pickedCat)[pickedId].count++; 
-        updateAllUIs();
+        saveEconomyState(); updateAllUIs(); refreshCollectionPowerUI();
         
         setGlobalPause(true);
         const resultEl = document.getElementById('event-result');
@@ -1925,6 +2443,119 @@
         
         resultEl.innerHTML = `<h2 style="margin-bottom:20px; color:#f6e58d;">🎉 합성 성공! 🎉</h2><div class="pop-zoom" style="display:flex; justify-content:center;">${imgHtml}</div><div style="font-size:24px; color:#3498db; font-weight:bold; margin-top:20px;">${nextTier} 등급 획득!</div><button class="action-btn" style="margin-top:30px; padding: 12px 24px; font-size:15px; border-radius:12px; border:2px solid #b9a0e6; background:#1dd1a1; color:white; font-weight:bold; cursor:pointer;" onclick="closeGacha()">확인</button>`;
         document.getElementById('event-overlay').style.display = 'flex'; resultEl.style.display = 'flex';
+    }
+
+    // ================= [ 통합 파편 / 분해 / 선택권 ] =================
+    let activeDisassembleTier='N';
+    let activeSelectorTier='N';
+
+    function collectibleLabel(cat) {
+        return {item:'이모지',skin:'구슬',char:'캐릭터',battle_char:'전투 캐릭터',char_bg:'캐릭터 배경',
+            bg_battle:'전투 배경',bg_merge:'머지 배경',bg_border:'테두리'}[cat]||cat;
+    }
+
+    function renderEconomyItemHtml(x) {
+        return `<div class="tier-label tier-${x.tier}">${x.tier}</div>${getHtmlForCategoryAndId(x.category,x.id)}`;
+    }
+
+    window.setDisassembleTier=function(tier){ activeDisassembleTier=TIER_ORDER.includes(tier)?tier:'N'; renderShardEconomyUI(); };
+    window.setSelectorTier=function(tier){ activeSelectorTier=TIER_ORDER.includes(tier)?tier:'N'; renderShardEconomyUI(); };
+
+    window.disassembleOne=function(category,id){
+        const inv=getInventoryRef(category);
+        if(!inv?.[id] || inv[id].count<=0) return;
+        const tier=inv[id].tier;
+        const before=calculateCollectionPower();
+        const after=collectionPowerAfterDelta(category,id,-1);
+        let message=`${tier} ${collectibleLabel(category)} 1개를 분해합니다.\\n획득: 🧩 ${FRAGMENT_VALUES[tier].toLocaleString()}`;
+        if(after.multiplier < before.multiplier) {
+            message+=`\\n\\n⚠️ 마지막 보유품입니다.\\nCollection Power ×${before.multiplier.toFixed(2)} → ×${after.multiplier.toFixed(2)} (-${(before.multiplier-after.multiplier).toFixed(2)})`;
+        } else {
+            message+=`\\n\\nCollection Power 변화 없음 (중복 분해)`;
+        }
+        if(!confirm(message+'\\n\\n계속할까요?')) return;
+        inv[id].count--;
+        fragments+=FRAGMENT_VALUES[tier];
+        saveEconomyState(); updateAllUIs();
+        showFloatingText(`🧩 +${FRAGMENT_VALUES[tier].toLocaleString()}`,210,330,'#f39c12');
+    };
+
+    window.disassembleAllDuplicates=function(){
+        let gained=0, removed=0;
+        getAllCollectibles().forEach(x=>{
+            const count=Number(x.inv?.[x.id]?.count||0);
+            const extras=Math.max(0,count-1);
+            if(extras>0) {
+                x.inv[x.id].count-=extras;
+                gained+=extras*FRAGMENT_VALUES[x.tier];
+                removed+=extras;
+            }
+        });
+        if(!removed){ showFloatingText('분해할 중복 아이템이 없습니다.',210,330,'#6a4c9c'); return; }
+        fragments+=gained;
+        saveEconomyState(); updateAllUIs();
+        alert(`🧹 중복 전체 분해 완료\\n${removed.toLocaleString()}개 분해\\n🧩 +${gained.toLocaleString()}\\n\\n마지막 1개는 모두 보존되어 Collection Power 변화가 없습니다.`);
+    };
+
+    window.buySelectorItem=function(category,id,tier){
+        const cost=SELECTOR_COSTS[tier];
+        if(fragments<cost){ showFloatingText(`파편이 부족합니다! 🧩 ${cost.toLocaleString()}`,210,330,'#ff7675'); return; }
+        const inv=getInventoryRef(category);
+        if(!inv?.[id]) return;
+        const before=calculateCollectionPower();
+        const after=collectionPowerAfterDelta(category,id,+1);
+        const powerText=after.multiplier>before.multiplier
+            ? `\\nCollection Power ×${before.multiplier.toFixed(2)} → ×${after.multiplier.toFixed(2)} (+${(after.multiplier-before.multiplier).toFixed(2)})`
+            : '\\n이미 보유 중이므로 Collection Power 변화 없음 (중복 획득)';
+        if(!confirm(`${tier} 선택권\\n🧩 ${cost.toLocaleString()} 파편을 사용해 이 아이템을 확정 획득할까요?${powerText}`)) return;
+        fragments-=cost;
+        inv[id].count++;
+        saveEconomyState(); updateAllUIs();
+        showFloatingText(`🎫 ${tier} 선택 획득!`,210,330,'#6a4c9c');
+    };
+
+    function renderShardEconomyUI(){
+        const bal=document.getElementById('fragment-balance'); if(bal) bal.innerText=formatCompactNumber(fragments);
+
+        const dTabs=document.getElementById('disassemble-tier-tabs');
+        if(dTabs) dTabs.innerHTML=TIER_ORDER.map(t=>`<button class="economy-tab ${activeDisassembleTier===t?'active':''}" onclick="setDisassembleTier('${t}')">${t} · 🧩${formatCompactNumber(FRAGMENT_VALUES[t])}</button>`).join('');
+
+        const dGrid=document.getElementById('disassemble-grid');
+        if(dGrid) {
+            const items=getAllCollectibles(activeDisassembleTier).filter(x=>(x.inv?.[x.id]?.count||0)>0);
+            dGrid.innerHTML='';
+            items.forEach(x=>{
+                const count=Number(x.inv[x.id].count||0);
+                const div=document.createElement('div');
+                div.className='economy-item';
+                div.innerHTML=renderEconomyItemHtml(x)+`<div class="small-count">×${count}</div>`+(count===1?'<div class="power-risk">POWER↓</div>':'');
+                div.title=`${collectibleLabel(x.category)} · ${x.tier} · 분해 ${FRAGMENT_VALUES[x.tier]} 파편`;
+                div.onclick=()=>disassembleOne(x.category,x.id);
+                dGrid.appendChild(div);
+            });
+            if(!items.length) dGrid.innerHTML='<div class="empty-state" style="grid-column:1/-1;">이 등급의 보유 아이템이 없습니다.</div>';
+        }
+
+        const sTabs=document.getElementById('selector-tier-tabs');
+        if(sTabs) sTabs.innerHTML=TIER_ORDER.map(t=>`<button class="economy-tab ${activeSelectorTier===t?'active':''}" onclick="setSelectorTier('${t}')">${t}</button>`).join('');
+        const cost=SELECTOR_COSTS[activeSelectorTier];
+        const costEl=document.getElementById('selector-cost'); if(costEl) costEl.innerText=formatCompactNumber(cost);
+        const costLabel=document.getElementById('selector-cost-label'); if(costLabel) costLabel.innerText=`${activeSelectorTier} 선택권`;
+
+        const sGrid=document.getElementById('selector-grid');
+        if(sGrid) {
+            const items=getAllCollectibles(activeSelectorTier);
+            sGrid.innerHTML='';
+            items.forEach(x=>{
+                const owned=Number(x.inv?.[x.id]?.count||0)>0;
+                const div=document.createElement('div');
+                div.className='economy-item';
+                div.innerHTML=renderEconomyItemHtml(x)+`<div class="small-count">${owned?'보유':'미보유'}</div>`+(!owned?'<div class="new-power">POWER↑</div>':'');
+                div.title=`${activeSelectorTier} 선택권 · ${cost.toLocaleString()} 파편`;
+                div.onclick=()=>buySelectorItem(x.category,x.id,activeSelectorTier);
+                sGrid.appendChild(div);
+            });
+        }
     }
 
     // ================= [ 💡 캐릭터 시스템 (뷰 3) 우측 탭 디자인 반영 ] =================
@@ -1946,6 +2577,7 @@
     let charEmojiPage = 0;
     let charEmojiTierFilter = 'ALL';
     const CHAR_EMOJI_PAGE_SIZE = 20;
+    let charOwnedOnly = { bg:false, body:false, emoji:false };
 
     // 감상/꾸미기 상태: 게임 데이터와 분리하여 사용자 로컬 설정으로만 저장
     let charCustomizeMode = false;
@@ -2088,6 +2720,55 @@
         if (!body || !zone || !bg) return;
         charLoveBound = true;
 
+        // 편집 버튼을 누를 때 이벤트가 배경까지 버블링되어
+        // 선택 이모지가 해제되는 것을 방지한다.
+        ['char-customize-toolbar','char-customize-topbar'].forEach(id => {
+            const ui = document.getElementById(id);
+            if(!ui || ui.dataset.pointerGuardBound==='1') return;
+            ui.dataset.pointerGuardBound='1';
+            ui.addEventListener('pointerdown', ev => ev.stopPropagation());
+        });
+
+        // 컬렉션 > 캐릭터:
+        // 1) 꾸미기 모드 ON  -> 캐릭터/이모지/배경 클릭은 편집 동작을 우선한다.
+        // 2) 꾸미기 완료 상태 -> 왼쪽 미리보기의 배경/캐릭터/배치 이모지 클릭 시
+        //    열린 카테고리를 자동으로 닫고 감상 모드로 전환한다.
+        zone.addEventListener('click', (e) => {
+            if(isCharItemZoneHidden || charCustomizeMode) return;
+
+            const target=e.target;
+            if(!target || !target.closest) return;
+
+            // 꾸미기 버튼/상단 UI/카테고리 토글 자체는 자동 닫힘 대상에서 제외
+            if(target.closest('#char-customize-btn')) return;
+            if(target.closest('#char-customize-toolbar')) return;
+            if(target.closest('#char-customize-topbar')) return;
+            if(target.closest('#char-toggle-btn')) return;
+
+            const clickedPreviewContent =
+                target === zone ||
+                target.id === 'char-preview-bg' ||
+                target.id === 'char-preview-body' ||
+                !!target.closest('.placed-emoji');
+
+            if(clickedPreviewContent) toggleCharItemZone(true);
+        });
+
+        zone.addEventListener('pointerdown', (e) => {
+            if(!charCustomizeMode || charEditTarget!=='emoji') return;
+            const target = e.target;
+            if(target && target.closest){
+                if(target.closest('.placed-emoji')) return;
+                // 꾸미기 UI를 누른 것은 '빈 배경 클릭'이 아니다.
+                if(target.closest('#char-customize-toolbar')) return;
+                if(target.closest('#char-customize-topbar')) return;
+                if(target.closest('#char-customize-btn')) return;
+                if(target.closest('#char-toggle-btn')) return;
+            }
+            selectedEmojiUid=null;
+            syncCharEditTargetUI();
+        });
+
         body.addEventListener('pointerdown', (e) => {
             if (!isCharItemZoneHidden) return;
             if (charCustomizeMode && charEditTarget !== 'character') return;
@@ -2150,24 +2831,55 @@
         if(persist) saveCharScene();
     }
 
+    let selectedEmojiUid = null;
     let charCustomizeSnapshot=null;
     window.enterCharCustomizeMode=function(){
         if(!isCharItemZoneHidden) toggleCharItemZone(true);
         charCustomizeSnapshot=JSON.stringify(charScene);
+        selectedEmojiUid=null;
         charCustomizeMode=true; setCharEditTarget('character');
         document.querySelector('.char-custom-layout')?.classList.add('char-editing');
         applySceneTransforms(false);
     };
-    window.finishCharCustomizeMode=function(){ charCustomizeMode=false; charCustomizeSnapshot=null; document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background'); saveCharScene(); };
+    window.finishCharCustomizeMode=function(){
+        charCustomizeMode=false; charCustomizeSnapshot=null; selectedEmojiUid=null;
+        document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background','edit-target-emoji');
+        saveCharScene(); renderPlacedEmojis();
+    };
     window.cancelCharCustomizeMode=function(){
         if(charCustomizeSnapshot){ try{charScene=JSON.parse(charCustomizeSnapshot);}catch(e){} }
-        charCustomizeMode=false; charCustomizeSnapshot=null; document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background'); applySceneTransforms(false);
+        charCustomizeMode=false; charCustomizeSnapshot=null; selectedEmojiUid=null;
+        document.querySelector('.char-custom-layout')?.classList.remove('char-editing','edit-target-background','edit-target-emoji');
+        applySceneTransforms(false);
     };
-    window.setCharEditTarget=function(target){
-        charEditTarget=target==='background'?'background':'character';
-        const layout=document.querySelector('.char-custom-layout'); layout?.classList.toggle('edit-target-background',charEditTarget==='background');
+    function syncCharEditTargetUI(){
+        const layout=document.querySelector('.char-custom-layout');
+        layout?.classList.toggle('edit-target-background',charEditTarget==='background');
+        layout?.classList.toggle('edit-target-emoji',charEditTarget==='emoji');
         document.getElementById('char-edit-character')?.classList.toggle('active',charEditTarget==='character');
         document.getElementById('char-edit-background')?.classList.toggle('active',charEditTarget==='background');
+        document.getElementById('char-edit-emoji')?.classList.toggle('active',charEditTarget==='emoji');
+        document.getElementById('char-edit-emoji-controls')?.classList.toggle('no-selection',
+            charEditTarget==='emoji' && selectedEmojiUid==null
+        );
+
+        document.querySelectorAll('.placed-emoji').forEach(el=>{
+            el.classList.toggle('selected',
+                charCustomizeMode &&
+                charEditTarget==='emoji' &&
+                String(el.dataset.uid)===String(selectedEmojiUid)
+            );
+        });
+    }
+
+    window.setCharEditTarget=function(target){
+        charEditTarget = target === 'background' ? 'background' : (target === 'emoji' ? 'emoji' : 'character');
+        if (charEditTarget !== 'emoji') selectedEmojiUid = null;
+        syncCharEditTargetUI();
+
+        if(charEditTarget==='emoji' && selectedEmojiUid==null && charScene.emojis.length){
+            if(typeof showToast==='function') showToast('배경 위 이모지를 선택해 주세요.');
+        }
     };
     window.adjustCharScale=function(delta){charScene.character.scale=Math.max(.55,Math.min(1.65,(Number(charScene.character.scale)||1)+delta));applySceneTransforms(true);};
     window.adjustCharRotate=function(delta){charScene.character.rotate=Math.max(-35,Math.min(35,(Number(charScene.character.rotate)||0)+delta));applySceneTransforms(true);};
@@ -2176,25 +2888,145 @@
     window.adjustBackgroundScale=function(delta){const b=currentBgAdjust();b.scale=Math.max(1,Math.min(1.8,(Number(b.scale)||1)+delta));applySceneTransforms(true);};
     window.resetBackgroundTransform=function(){const m=BACKGROUND_META?.lobby?.[charConfig.bg]||{};charScene.backgroundById[charConfig.bg]={x:Number(m.focusX)||50,y:Number(m.focusY)||50,scale:1};applySceneTransforms(true);};
     window.openEmojiLibrary=function(){ if(isCharItemZoneHidden)toggleCharItemZone(false); selectCharCategory('emoji'); };
-    window.clearPlacedEmojis=function(){ if(!charScene.emojis.length)return; if(confirm('배치한 이모지를 모두 삭제할까요?')){charScene.emojis=[];renderPlacedEmojis();saveCharScene();} };
+    window.clearPlacedEmojis=function(){
+        if(!charScene.emojis.length)return;
+        if(confirm('배치한 이모지를 모두 삭제할까요?')){
+            charScene.emojis=[]; selectedEmojiUid=null;
+            if(charEditTarget==='emoji') setCharEditTarget('character');
+            renderPlacedEmojis(); saveCharScene();
+        }
+    };
     function addPlacedEmoji(symbol){
         if(charScene.emojis.length>=50){ if(typeof showToast==='function') showToast('이모지는 최대 50개까지 배치할 수 있어요.'); else alert('이모지는 최대 50개까지 배치할 수 있어요.'); return; }
         sceneEmojiSerial++;
         const offset=(charScene.emojis.length%7)-3;
-        charScene.emojis.push({uid:sceneEmojiSerial,symbol,x:50+offset*3,y:48+((charScene.emojis.length%5)-2)*3});
+        charScene.emojis.push({
+            uid:sceneEmojiSerial, symbol,
+            x:50+offset*3, y:48+((charScene.emojis.length%5)-2)*3,
+            scale:1, rotate:0, flip:1
+        });
+        if(charCustomizeMode){ selectedEmojiUid=sceneEmojiSerial; setCharEditTarget('emoji'); }
         renderPlacedEmojis();saveCharScene();
     }
+    function getSelectedEmoji(){
+        return charScene.emojis.find(e => String(e.uid) === String(selectedEmojiUid)) || null;
+    }
+
+    function findPlacedEmojiElement(uid){
+        return Array.from(document.querySelectorAll('.placed-emoji'))
+            .find(el => String(el.dataset.uid) === String(uid)) || null;
+    }
+
+    function selectPlacedEmoji(uid){
+        if(!charCustomizeMode) return;
+        selectedEmojiUid = uid;
+        charEditTarget = 'emoji';
+        syncCharEditTargetUI();
+    }
+
+    function updateSelectedEmojiVisual(){
+        const e=getSelectedEmoji(); if(!e) return false;
+        const el=findPlacedEmojiElement(e.uid);
+        if(!el) return false;
+        el.style.setProperty('--emoji-scale',String(Number(e.scale)||1));
+        el.style.setProperty('--emoji-rotate',`${Number(e.rotate)||0}deg`);
+        el.style.setProperty('--emoji-flip',String(Number(e.flip)===-1?-1:1));
+        el.classList.add('selected');
+        syncCharEditTargetUI();
+        return true;
+    }
+
+    window.adjustSelectedEmojiScale=function(delta){
+        const e=getSelectedEmoji(); if(!e) return;
+        e.scale=Math.max(.50,Math.min(2.50,(Number(e.scale)||1)+delta));
+        updateSelectedEmojiVisual(); saveCharScene();
+    };
+    window.adjustSelectedEmojiRotate=function(delta){
+        const e=getSelectedEmoji(); if(!e) return;
+        let next=(Number(e.rotate)||0)+delta;
+        while(next>180) next-=360; while(next<-180) next+=360;
+        e.rotate=next;
+        updateSelectedEmojiVisual(); saveCharScene();
+    };
+    window.flipSelectedEmoji=function(){
+        const e=getSelectedEmoji(); if(!e) return;
+        e.flip=Number(e.flip)===-1?1:-1;
+        updateSelectedEmojiVisual(); saveCharScene();
+    };
+    window.resetSelectedEmojiTransform=function(){
+        const e=getSelectedEmoji(); if(!e) return;
+        e.scale=1; e.rotate=0; e.flip=1;
+        updateSelectedEmojiVisual(); saveCharScene();
+    };
+    window.deleteSelectedEmoji=function(){
+        if(selectedEmojiUid==null) return;
+        charScene.emojis=charScene.emojis.filter(e=>String(e.uid)!==String(selectedEmojiUid));
+        selectedEmojiUid=null;
+        setCharEditTarget('character');
+        renderPlacedEmojis(); saveCharScene();
+    };
+
     function renderPlacedEmojis(){
-        const layer=document.getElementById('char-emoji-layer'); if(!layer)return; layer.innerHTML='';
+        const layer=document.getElementById('char-emoji-layer');
+        if(!layer)return;
+        layer.innerHTML='';
+
+        // 이전 버전 세이브 호환: scale/rotate/flip이 없으면 기본값 사용
         charScene.emojis.forEach(e=>{
-            const el=document.createElement('span'); el.className='placed-emoji'; el.textContent=e.symbol; el.dataset.uid=e.uid;
-            el.style.setProperty('--emoji-x',`${Math.max(4,Math.min(96,Number(e.x)||50))}%`); el.style.setProperty('--emoji-y',`${Math.max(5,Math.min(95,Number(e.y)||50))}%`);
+            e.scale = Math.max(.50,Math.min(2.50,Number(e.scale)||1));
+            e.rotate = Number.isFinite(Number(e.rotate)) ? Number(e.rotate) : 0;
+            e.flip = Number(e.flip)===-1 ? -1 : 1;
+
+            const el=document.createElement('span');
+            el.className='placed-emoji' + (String(e.uid)===String(selectedEmojiUid) && charCustomizeMode ? ' selected' : '');
+            el.textContent=e.symbol;
+            el.dataset.uid=e.uid;
+            el.style.setProperty('--emoji-x',`${Math.max(4,Math.min(96,Number(e.x)||50))}%`);
+            el.style.setProperty('--emoji-y',`${Math.max(5,Math.min(95,Number(e.y)||50))}%`);
+            el.style.setProperty('--emoji-scale',String(e.scale));
+            el.style.setProperty('--emoji-rotate',`${e.rotate}deg`);
+            el.style.setProperty('--emoji-flip',String(e.flip));
+
             let drag=null;
-            el.addEventListener('pointerdown',ev=>{if(!charCustomizeMode)return;ev.stopPropagation();ev.preventDefault();drag={id:ev.pointerId,sx:ev.clientX,sy:ev.clientY,bx:e.x,by:e.y};el.setPointerCapture?.(ev.pointerId);el.classList.add('dragging');});
-            el.addEventListener('pointermove',ev=>{if(!drag||drag.id!==ev.pointerId)return;const r=layer.getBoundingClientRect();e.x=Math.max(4,Math.min(96,drag.bx+(ev.clientX-drag.sx)/r.width*100));e.y=Math.max(5,Math.min(95,drag.by+(ev.clientY-drag.sy)/r.height*100));el.style.setProperty('--emoji-x',`${e.x}%`);el.style.setProperty('--emoji-y',`${e.y}%`);});
-            const fin=ev=>{if(drag&&drag.id===ev.pointerId){el.releasePointerCapture?.(ev.pointerId);drag=null;el.classList.remove('dragging');saveCharScene();}}; el.addEventListener('pointerup',fin);el.addEventListener('pointercancel',fin);
+            el.addEventListener('pointerdown',ev=>{
+                if(!charCustomizeMode)return;
+                ev.stopPropagation(); ev.preventDefault();
+
+                selectedEmojiUid=e.uid;
+                charEditTarget='emoji';
+                syncCharEditTargetUI();
+
+                drag={
+                    id:ev.pointerId, sx:ev.clientX, sy:ev.clientY,
+                    bx:Number(e.x)||50, by:Number(e.y)||50, moved:false
+                };
+                el.setPointerCapture?.(ev.pointerId);
+                el.classList.add('dragging','selected');
+            });
+            el.addEventListener('pointermove',ev=>{
+                if(!drag||drag.id!==ev.pointerId)return;
+                const r=layer.getBoundingClientRect();
+                if(Math.hypot(ev.clientX-drag.sx,ev.clientY-drag.sy)>5) drag.moved=true;
+                e.x=Math.max(4,Math.min(96,drag.bx+(ev.clientX-drag.sx)/r.width*100));
+                e.y=Math.max(5,Math.min(95,drag.by+(ev.clientY-drag.sy)/r.height*100));
+                el.style.setProperty('--emoji-x',`${e.x}%`);
+                el.style.setProperty('--emoji-y',`${e.y}%`);
+            });
+            const fin=ev=>{
+                if(drag&&drag.id===ev.pointerId){
+                    el.releasePointerCapture?.(ev.pointerId);
+                    drag=null;
+                    el.classList.remove('dragging');
+                    el.classList.add('selected');
+                    saveCharScene();
+                    syncCharEditTargetUI();
+                }
+            };
+            el.addEventListener('pointerup',fin);
+            el.addEventListener('pointercancel',fin);
             layer.appendChild(el);
         });
+        syncCharEditTargetUI();
     }
 
     function applyCharacterPreviewBackground(path, lobbyId = charConfig.bg) {
@@ -2261,6 +3093,7 @@
             .map(Number)
             .filter(id => id >= 0 && id < 29)
             .filter(id => charBodyTierFilter === 'ALL' || CHARACTER_META[id]?.tier === charBodyTierFilter)
+            .filter(id => !charOwnedOnly.body || (charInventory[id]?.count||0) > 0)
             .sort((a,b) => a-b);
     }
 
@@ -2281,7 +3114,8 @@
 
     function getFilteredCharEmojiIds() {
         const all=[...(ITEMS_DB.N||[])];
-        return charEmojiTierFilter==='ALL'||charEmojiTierFilter==='N' ? all : [];
+        if(!(charEmojiTierFilter==='ALL'||charEmojiTierFilter==='N')) return [];
+        return all.filter(symbol => !charOwnedOnly.emoji || (itemInventory[symbol]?.count||0) > 0);
     }
     window.setCharEmojiPage=function(page){const all=getFilteredCharEmojiIds();const max=Math.max(0,Math.ceil(all.length/CHAR_EMOJI_PAGE_SIZE)-1);charEmojiPage=Math.max(0,Math.min(max,page));renderCharItems();resetCharBgScroll();};
     window.setCharEmojiTierFilter=function(tier){charEmojiTierFilter=tier;charEmojiPage=0;renderCharItems();resetCharBgScroll();};
@@ -2291,7 +3125,26 @@
             .map(Number)
             .filter(id => id >= 1 && id <= 63)
             .filter(id => charBgTierFilter === 'ALL' || BACKGROUND_META.lobby[id]?.tier === charBgTierFilter)
+            .filter(id => !charOwnedOnly.bg || (charBgInventory[id]?.count||0) > 0)
             .sort((a,b) => a-b);
+    }
+
+    window.toggleCharOwnedOnly=function(category){
+        if(!Object.prototype.hasOwnProperty.call(charOwnedOnly,category)) return;
+        charOwnedOnly[category]=!charOwnedOnly[category];
+        if(category==='bg') charBgPage=0;
+        if(category==='body') charBodyPage=0;
+        if(category==='emoji') charEmojiPage=0;
+        renderCharItems();
+        resetCharBgScroll();
+    };
+
+    function makeOwnedOnlyButton(category, ownedCount, totalCount) {
+        const btn=document.createElement('button');
+        btn.className=`owned-only-toggle ${charOwnedOnly[category]?'active':''}`;
+        btn.innerHTML=`<span class="check">✓</span> ${charOwnedOnly[category]?'보유만 보는 중':'보유만 보기'} · ${ownedCount}/${totalCount}`;
+        btn.onclick=()=>toggleCharOwnedOnly(category);
+        return btn;
     }
 
     function resetCharBgScroll() {
@@ -2356,6 +3209,13 @@
             });
             controls.appendChild(tierTabs);
 
+            const ownershipRow=document.createElement('div');
+            ownershipRow.className='char-bg-toolbar';
+            const bodyAllIds=Object.keys(CHARACTER_META).map(Number).filter(id=>id>=0&&id<29);
+            const bodyOwned=bodyAllIds.filter(id=>(charInventory[id]?.count||0)>0).length;
+            ownershipRow.appendChild(makeOwnedOnlyButton('body',bodyOwned,bodyAllIds.length));
+            controls.appendChild(ownershipRow);
+
             const toolbar = document.createElement('div');
             toolbar.className = 'char-bg-toolbar';
             const rangeStart = allIds.length ? start + 1 : 0;
@@ -2397,12 +3257,18 @@
             const tierTabs=document.createElement('div');tierTabs.className='char-bg-tier-tabs';
             ['ALL','N'].forEach(tier=>{const btn=document.createElement('button');btn.className=`char-bg-tier-btn ${charEmojiTierFilter===tier?'active':''}`;btn.innerText=`${tier==='ALL'?'전체':'N'} ${allIds.length}`;btn.onclick=()=>setCharEmojiTierFilter(tier);tierTabs.appendChild(btn);});
             controls.appendChild(tierTabs);
+            const ownershipRow=document.createElement('div');ownershipRow.className='char-bg-toolbar';
+            const emojiAll=(ITEMS_DB.N||[]);
+            const emojiOwned=emojiAll.filter(symbol=>(itemInventory[symbol]?.count||0)>0).length;
+            ownershipRow.appendChild(makeOwnedOnlyButton('emoji',emojiOwned,emojiAll.length));
+            controls.appendChild(ownershipRow);
             const toolbar=document.createElement('div');toolbar.className='char-bg-toolbar';
             const rangeStart=allIds.length?start+1:0, rangeEnd=Math.min(start+CHAR_EMOJI_PAGE_SIZE,allIds.length);
             toolbar.innerHTML=`<button class="char-bg-page-btn" ${charEmojiPage===0?'disabled':''} onclick="setCharEmojiPage(${charEmojiPage-1})">‹</button><div class="char-bg-page-info">N · ${rangeStart}-${rangeEnd} / ${allIds.length} · ${charEmojiPage+1}/${totalPages}</div><button class="char-bg-page-btn" ${charEmojiPage>=totalPages-1?'disabled':''} onclick="setCharEmojiPage(${charEmojiPage+1})">›</button>`;
             controls.appendChild(toolbar);
             const clearRow=document.createElement('div');clearRow.style.cssText='grid-column:1/-1;display:flex;justify-content:center;padding:0 0 4px';clearRow.innerHTML=`<button class="char-bg-page-btn" style="width:auto;padding:0 10px;color:#d63031" onclick="clearPlacedEmojis()">🗑 배치 이모지 전체 삭제 (${charScene.emojis.length})</button>`;controls.appendChild(clearRow);list.appendChild(controls);
             pageIds.forEach(symbol=>{const owned=(itemInventory[symbol]?.count||0)>0;const div=document.createElement('div');div.className=`char-item-btn ${owned?'':'unowned'}`;div.title=`${symbol} · N 등급 · ${owned?'배경에 배치':'미보유'}`;div.innerHTML=`<div class="char-tier-badge">N</div><span>${symbol}</span>${owned?'':'<div class="lock-mark">🔒</div>'}`;if(owned)div.onclick=()=>{if(!charCustomizeMode){toggleCharItemZone(true);enterCharCustomizeMode();} addPlacedEmoji(symbol);};list.appendChild(div);});
+            if(charOwnedOnly.emoji && !pageIds.length){const empty=document.createElement('div');empty.className='owned-only-empty';empty.innerHTML='현재 보유한 이모지가 없습니다.<br>「보유만 보기」를 끄면 전체 이모지를 확인할 수 있어요.';list.appendChild(empty);}
         } else if (catData.id === 'bg') {
             // 대량 배경: 티어 필터 + 번호순 + 12개 페이지
             const allIds = getFilteredCharBgIds();
@@ -2425,6 +3291,13 @@
                 tierTabs.appendChild(btn);
             });
             controls.appendChild(tierTabs);
+
+            const ownershipRow=document.createElement('div');
+            ownershipRow.className='char-bg-toolbar';
+            const bgAllIds=Object.keys(BACKGROUND_META.lobby).map(Number).filter(id=>id>=1&&id<=63);
+            const bgOwned=bgAllIds.filter(id=>(charBgInventory[id]?.count||0)>0).length;
+            ownershipRow.appendChild(makeOwnedOnlyButton('bg',bgOwned,bgAllIds.length));
+            controls.appendChild(ownershipRow);
 
             const toolbar = document.createElement('div');
             toolbar.className = 'char-bg-toolbar';
@@ -2454,6 +3327,11 @@
                 if (owned) div.onclick = () => { charConfig.bg=i; applyCharacterPreviewBackground(imgSrc, i); applySceneTransforms(false); renderCharItems(); };
                 list.appendChild(div);
             });
+            if(charOwnedOnly.bg && !pageIds.length){
+                const empty=document.createElement('div'); empty.className='owned-only-empty';
+                empty.innerHTML='현재 보유한 배경이 없습니다.<br>「보유만 보기」를 끄면 전체 배경을 확인할 수 있어요.';
+                list.appendChild(empty);
+            }
         }
     }
 
@@ -2572,6 +3450,12 @@
         {id:'char', name:'캐릭터'}, {id:'battle_char', name:'전투 캐릭터'}, {id:'char_bg', name:'캐릭터 배경'}, {id:'game_bg', name:'게임 배경'}
     ];
     let activeItemCategory = 'all';
+    let codexOwnedOnly = false;
+
+    window.toggleCodexOwnedOnly=function(){
+        codexOwnedOnly=!codexOwnedOnly;
+        updateItemUI();
+    };
 
     function getCollectionEntries(category) {
         const out=[];
@@ -2601,9 +3485,15 @@
         ITEM_COLLECTION_CATEGORIES.forEach(c=>{
             const b=document.createElement('button'); b.className=`collection-tab ${activeItemCategory===c.id?'active':''}`; b.innerText=c.name; b.onclick=()=>setItemCategory(c.id); tabs.appendChild(b);
         });
-        const entries=getCollectionEntries(activeItemCategory);
-        const uniqueOwned=entries.filter(e=>e.count>0).length;
-        if (summary) summary.innerText=`보유 ${uniqueOwned} / ${entries.length}종 · 미획득 아이템도 도감에서 확인할 수 있습니다.`;
+        const allEntries=getCollectionEntries(activeItemCategory);
+        const uniqueOwned=allEntries.filter(e=>e.count>0).length;
+        const entries=codexOwnedOnly ? allEntries.filter(e=>e.count>0) : allEntries;
+        const ownedBtn=document.getElementById('codex-owned-only-btn');
+        if(ownedBtn){
+            ownedBtn.classList.toggle('active',codexOwnedOnly);
+            ownedBtn.innerHTML=`<span class="check">✓</span> ${codexOwnedOnly?'보유만 보는 중':'보유만 보기'} · ${uniqueOwned}/${allEntries.length}`;
+        }
+        if (summary) summary.innerText=`보유 ${uniqueOwned} / ${allEntries.length}종 · COLLECTION POWER ×${collectionPowerMultiplier.toFixed(2)}${codexOwnedOnly?' · 보유품만 표시 중':' · 미획득도 확인 가능'}`;
         grid.innerHTML='';
         TIER_ORDER.forEach(tier=>{
             const tierEntries=entries.filter(e=>e.tier===tier);
@@ -2617,11 +3507,14 @@
                 grid.appendChild(div);
             });
         });
+        if(codexOwnedOnly && !entries.length){
+            grid.innerHTML='<div class="owned-only-empty">현재 이 카테고리에서 보유한 수집품이 없습니다.<br>「보유만 보기」를 끄면 전체 도감을 확인할 수 있어요.</div>';
+        }
     };
 
-    // V7 네비게이션: 상점 / 플레이 / 컬렉션 / 메뉴
+    // 네비게이션: 상점 / 플레이 / 컬렉션 / 도감 / 메뉴
     let currentMenu = 'battle';
-    let activeCollectionPage='character'; let activeMenuPage='leaderboard';
+    let activeCollectionPage='character'; let activeMenuPage='stats';
     window.switchCollectionPage=function(page){
         activeCollectionPage=page;
         document.querySelectorAll('#view-collection .collection-page').forEach(el=>el.classList.toggle('active',el.id===`view-${page}`));
@@ -2632,14 +3525,39 @@
         activeMenuPage=page;
         document.querySelectorAll('#view-menu .menu-page').forEach(el=>el.classList.toggle('active',el.id===`menu-${page}`));
         document.querySelectorAll('#menu-subnav .subnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
-        if(page==='leaderboard')renderLeaderboard(); if(page==='stats')renderRunStats(); if(page==='settings')applyGameSettings();
+        if(page==='stats'){ renderLeaderboard(); renderRunStats(); }
+        if(page==='settings')applyGameSettings();
     };
     window.switchMenu = function(menuId) {
-        const targetView=document.getElementById('view-'+menuId); const targetNav=document.getElementById('nav-'+menuId); if(!targetView||!targetNav)return;
+        // 도감은 데이터/화면 구조는 collection 안의 view-item을 재사용하지만
+        // 하단 네비게이션에서는 독립 메뉴로 동작한다.
+        const isCodex = menuId === 'codex';
+        const viewId = isCodex ? 'collection' : menuId;
+        const targetView=document.getElementById('view-'+viewId);
+        const targetNav=document.getElementById('nav-'+menuId);
+        if(!targetView||!targetNav)return;
+
         currentMenu=menuId;
-        document.querySelectorAll('#main-content > .view-container').forEach(el=>el.classList.remove('active')); targetView.classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); targetNav.classList.add('active');
-        if(menuId==='collection')switchCollectionPage(activeCollectionPage); else if(menuId==='menu')switchMenuPage(activeMenuPage); else if(menuId==='shop')updateGlobalCraftUI();
+        document.querySelectorAll('#main-content > .view-container').forEach(el=>el.classList.remove('active'));
+        targetView.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+        targetNav.classList.add('active');
+
+        if(isCodex){
+            // 컬렉션 서브탭은 도감 화면에서 선택 표시가 없도록 하고 도감 페이지만 표시
+            activeCollectionPage='item';
+            document.querySelectorAll('#view-collection .collection-page').forEach(el=>el.classList.toggle('active',el.id==='view-item'));
+            document.querySelectorAll('#collection-subnav .subnav-btn').forEach(b=>b.classList.remove('active'));
+            updateItemUI();
+        } else if(menuId==='collection'){
+            // 도감에서 컬렉션으로 돌아오면 캐릭터 탭부터 시작
+            if(activeCollectionPage==='item') activeCollectionPage='character';
+            switchCollectionPage(activeCollectionPage);
+        } else if(menuId==='menu'){
+            switchMenuPage(activeMenuPage);
+        } else if(menuId==='shop'){
+            updateGlobalCraftUI();
+        }
         if(typeof updatePreview==='function')updatePreview();
     }
 
@@ -2793,6 +3711,9 @@
     window.onload = async () => {
         await loadGameAssetData();
         rebuildAssetInventories();
+        loadEconomyState();
+        ensureDailyFreeDay();
+        refreshCollectionPowerUI();
         applyCharacterPreviewBackground(backgroundPath('lobby', charConfig.bg));
         document.getElementById('char-preview-body').src = characterPath(charConfig.body);
         document.getElementById('battle-stage').style.backgroundImage = `url('${backgroundPath('battle',bgConfig.battle)}')`;
@@ -3074,7 +3995,8 @@
 
         window.instantRestart = function() { if(restartCountdown) clearInterval(restartCountdown); window.restartGame(); }
         window.restartGame = function() {
-            document.getElementById('overlay-gameover').style.display = 'none';
+            const goOverlay=document.getElementById('overlay-gameover');
+            if(goOverlay){ goOverlay.style.display='none'; goOverlay.classList.remove('record-celebration'); }
             const bodies = Composite.allBodies(window.world).filter(b => b.level !== undefined); Composite.remove(window.world, bodies);
             isGameOver = false; resetRunScore(); setGlobalPause(false); updatePreview();
         }
